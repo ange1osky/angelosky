@@ -6,14 +6,20 @@ import { PlayIcon } from './Icons.jsx'
    controls during playback. */
 export default function VideoCard({ item, activeId, onActivate }) {
   const [playing, setPlaying] = useState(false)
+  const [paused, setPaused] = useState(false)
   const [failed, setFailed] = useState(false)
   const videoRef = useRef(null)
 
   const start = () => {
+    // Claim the single-play slot in the same batch as `playing`, so the effect
+    // below never sees a stale `activeId` and pause this card as it starts.
+    onActivate?.(item.id)
     setPlaying(true)
     // Wait for the element to mount before asking it to play.
     requestAnimationFrame(() => {
-      videoRef.current?.play().catch(() => setFailed(true))
+      // A rejection here means playback was interrupted or blocked by policy,
+      // not that the file is missing — only <video onError> tells us that.
+      videoRef.current?.play().catch(() => {})
     })
   }
 
@@ -36,14 +42,19 @@ export default function VideoCard({ item, activeId, onActivate }) {
     return () => observer.disconnect()
   }, [playing])
 
-  /* One video at a time — whenever another card takes over, this one stops. */
+  /* One video at a time — whenever another card takes over, this one stops.
+     The truthy guard matters: with no card active there is nothing to yield
+     to, and pausing here would abort a play() that is still resolving. */
   useEffect(() => {
-    if (activeId !== item.id) videoRef.current?.pause()
+    if (activeId && activeId !== item.id) videoRef.current?.pause()
   }, [activeId, item.id])
 
   return (
     <figure className="card card--video">
-      <div className="card__frame" data-playing={playing}>
+      {/* `playing` = the player is mounted; `live` = it is actually rolling.
+          The title hides on the second, but stays clear of the control bar on
+          the first, so a paused video still shows what it is. */}
+      <div className="card__frame" data-playing={playing} data-live={playing && !paused}>
         {playing ? (
           <video
             ref={videoRef}
@@ -60,7 +71,11 @@ export default function VideoCard({ item, activeId, onActivate }) {
             disablePictureInPicture
             onContextMenu={(e) => e.preventDefault()}
             /* Fires for the native control too, not just our play button. */
-            onPlay={() => onActivate?.(item.id)}
+            onPlay={() => {
+              setPaused(false)
+              onActivate?.(item.id)
+            }}
+            onPause={() => setPaused(true)}
             onError={() => setFailed(true)}
           />
         ) : (

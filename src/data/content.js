@@ -100,7 +100,7 @@ export const PROGRAMS = [
   {
     id: 'p1',
     title: 'GMTK Game Jam 2026: Goblin Alarm',
-    award: 'Top 38% of 10,000+ entries - Top 19% in Art Category',
+    award: 'Top 38% out of 10,000+ entries - Top 19% in Art Category',
     roles: 'Artist',
     href: 'https://boys-at-the-back.itch.io/goblin-alarm',
     image: '/images/titlebg.png',
