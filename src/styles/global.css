@@ -1233,6 +1233,13 @@ ul {
     padding-inline: var(--gutter);
   }
 
+  /* Copy owns its own stacking level so the breakout figure below can never
+     paint over the text or the Education/Experience buttons. */
+  .about__copy {
+    position: relative;
+    z-index: 1;
+  }
+
   /* Stacked layout leaves the figure marooned in a tall coral block. Let it
      break out of the top instead, pinned right so the copy stays clear. */
   .about__portrait {
@@ -1244,9 +1251,11 @@ ul {
     padding-right: var(--gutter);
   }
 
+  /* Rises to meet the copy for the breakout look, but the pull is gentle
+     enough that the head clears the button row sitting just above it. */
   .about__photo {
-    max-width: min(72%, 340px);
-    margin-top: clamp(-200px, -30vw, -96px);
+    max-width: min(64%, 300px);
+    margin-top: clamp(-132px, -18vw, -64px);
   }
 
   /* Narrow crops cut in from the sides — nudge both photos so the subject
