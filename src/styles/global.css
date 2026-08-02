@@ -1,0 +1,1336 @@
+/* ===========================================================================
+   angelosky — portfolio
+   One stylesheet, grouped by section. Tokens first, then layout primitives,
+   then each page section in the order it appears on screen.
+   ========================================================================= */
+
+/* --- Tokens -------------------------------------------------------------- */
+
+:root {
+  --coral: #fd6e60;
+  --coral-deep: #e8503f;
+  --mint: #6fe7d2;
+  --teal: #3c8577;
+  --teal-ink: #2e9e86;
+  --cream: #fdfdf0;
+  --ink: #0d0d0d;
+  --ink-3: #1c1c1c;
+  --ink-4: #232323;
+
+  --hairline: rgba(255, 255, 255, 0.1);
+
+  --nav-h: 72px;
+  --maxw: 1240px;
+  --gutter: clamp(20px, 5vw, 60px);
+
+  /* Drives both the "2026" type size and the hero padding that clears it. */
+  --year-size: clamp(3.4rem, 12vw, 9.2rem);
+  --badge-h: calc(var(--year-size) * 0.86);
+
+  --font: 'Poppins', 'Century Gothic', 'Segoe UI', system-ui, sans-serif;
+  --font-heavy: 'Archivo Black', 'Arial Black', 'Poppins', sans-serif;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* --- Reset --------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font);
+  font-weight: 400;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+img,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* --- Layout primitives --------------------------------------------------- */
+
+.shell {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Every green line in the mockup is a page boundary. Each page is its own
+   route, fills at least the viewport, and closes with its own copyright bar. */
+.section {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+  /* Held back until the curtain covers the screen, then faded up behind it.
+     Opacity only — animating clip-path here repainted the whole page (19 image
+     cards plus a backdrop) on every frame, which is what caused the stutter. */
+  animation: page-in 0.34s linear 0.3s both;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Full-bleed bars sweeping across the viewport. Pure transform, so they run on
+   the compositor and stay at 60fps no matter how heavy the page underneath is.
+   They fully cover mid-sweep, which is when the new page fades in. */
+.wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.wipe__bar {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+  animation: wipe-sweep 0.72s cubic-bezier(0.66, 0, 0.28, 1) forwards;
+}
+
+.wipe__bar--mint {
+  background: var(--mint);
+}
+
+.wipe__bar--coral {
+  background: var(--coral);
+  animation-delay: 0.09s;
+}
+
+@keyframes wipe-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Videos/Programs switch. Same directional read as the page wipe, but built
+   from transform + opacity so it never triggers a repaint of the card grid. */
+@keyframes tab-wipe {
+  from {
+    opacity: 0;
+    transform: translate3d(-2.5%, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.display {
+  font-weight: 200;
+  line-height: 0.92;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.page-chip {
+  display: inline-block;
+  padding: 3px 12px 4px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--coral);
+  font-size: clamp(0.62rem, 1vw, 0.78rem);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  line-height: 1.5;
+  backdrop-filter: blur(4px);
+}
+
+/* Stand-in for artwork that has not been dropped in yet. */
+.ph {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.05) 0 1px,
+      transparent 1px 11px
+    ),
+    rgba(255, 255, 255, 0.07);
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* --- Nav ----------------------------------------------------------------- */
+
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  background: rgba(13, 13, 13, 0.55);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid transparent;
+  transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+
+.nav--scrolled {
+  background: rgba(13, 13, 13, 0.86);
+  border-bottom-color: var(--hairline);
+}
+
+.nav__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+
+.nav__brand {
+  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: #fff;
+  transition: opacity 0.2s var(--ease);
+}
+
+.nav__brand:hover {
+  opacity: 0.7;
+}
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 3.4vw, 46px);
+}
+
+.nav__link {
+  position: relative;
+  padding: 6px 2px;
+  font-size: clamp(0.78rem, 1.35vw, 0.94rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.82);
+  transition: color 0.2s var(--ease);
+}
+
+.nav__link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1.5px;
+  background: var(--coral);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.28s var(--ease);
+}
+
+.nav__link:hover {
+  color: #fff;
+}
+
+.nav__link:hover::after,
+.nav__link--active::after {
+  transform: scaleX(1);
+}
+
+.nav__link--active {
+  color: #fff;
+}
+
+/* --- Footer bars --------------------------------------------------------- */
+
+.footer-bar {
+  display: flex;
+  align-items: center;
+  /* Sits at the very bottom of its page even when the content is short. */
+  margin-top: auto;
+  min-height: 76px;
+  font-size: clamp(0.85rem, 1.5vw, 1.05rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.footer-bar--dark {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+.footer-bar--light {
+  background: var(--cream);
+  color: var(--ink);
+}
+
+/* ===========================================================================
+   SECTION 01 — Home
+   ========================================================================= */
+
+.hero {
+  position: relative;
+  flex: 1 0 auto;
+  display: flex;
+  align-items: flex-end;
+  min-height: clamp(460px, 68vh, 720px);
+  padding-top: calc(var(--nav-h) + 40px);
+  /* Enough room that the hero copy always clears the "2026 edition" lock-up. */
+  padding-bottom: calc(var(--badge-h) + clamp(18px, 3.5vh, 44px));
+  overflow: hidden;
+  background: #0a1410;
+  isolation: isolate;
+}
+
+/* The source is 2.05:1, so the crop tightens hard on narrow screens —
+   46% keeps the silhouette and tripod centred rather than the empty sky. */
+.hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 46% 50%;
+}
+
+/* Sunset-into-dark wash so the composition reads like the mockup even with a
+   placeholder sitting behind it. */
+.hero__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      120% 90% at 70% 45%,
+      rgba(253, 110, 96, 0.22) 0%,
+      transparent 58%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 14, 11, 0.9) 0%,
+      rgba(10, 12, 10, 0.55) 40%,
+      rgba(8, 8, 8, 0.88) 100%
+    );
+}
+
+.hero__inner {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(24px, 6vw, 72px);
+  flex-wrap: wrap;
+}
+
+.hero__kicker {
+  font-size: clamp(0.95rem, 1.9vw, 1.3rem);
+  font-weight: 400;
+  letter-spacing: 0.005em;
+}
+
+.hero__title {
+  font-size: clamp(3rem, 11.5vw, 9rem);
+  margin-top: 2px;
+}
+
+.hero__chip {
+  margin-top: -0.55em;
+  margin-left: clamp(6px, 1vw, 14px);
+  position: relative;
+  z-index: 2;
+}
+
+.hero__tagline {
+  display: flex;
+  align-items: baseline;
+  gap: 0.42em;
+  padding-bottom: clamp(8px, 3vh, 34px);
+  font-size: clamp(1.05rem, 2.1vw, 1.55rem);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.tone-coral {
+  color: var(--coral);
+}
+.tone-mint {
+  color: var(--mint);
+}
+
+/* "2026 edition" lock-up, pinned to the bottom-right bleed of the hero. */
+.hero__badge {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  padding-left: clamp(10px, 2vw, 26px);
+  padding-right: clamp(14px, 3vw, 40px);
+}
+
+.hero__badge-panel {
+  position: absolute;
+  right: 0;
+  /* Overshoots the hero's bottom edge — .hero clips it, so the panel always
+     lands flush against the coral block below with no hairline gap. */
+  bottom: -48px;
+  width: min(78%, 420px);
+  height: calc(76% + 48px);
+  border-radius: 14px 0 0 0;
+  background: rgba(253, 110, 96, 0.55);
+}
+
+.hero__year {
+  position: relative;
+  font-size: var(--year-size);
+  font-weight: 800;
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+  color: var(--coral);
+  text-shadow: 0 6px 34px rgba(0, 0, 0, 0.4);
+}
+
+.hero__edition {
+  position: relative;
+  padding-bottom: clamp(4px, 1.2vw, 14px);
+  margin-left: -0.04em;
+  font-size: clamp(1.6rem, 5.6vw, 4.3rem);
+  font-weight: 300;
+  line-height: 0.9;
+  letter-spacing: 0.005em;
+  /* Full-strength coral over the 55% panel, so it reads brighter than the
+     block behind it rather than contrasting against it. */
+  color: var(--coral);
+}
+
+/* --- About split --------------------------------------------------------- */
+
+.about {
+  display: grid;
+  grid-template-columns: minmax(0, 1.24fr) minmax(0, 1fr);
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.about__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(44px, 7vw, 84px) clamp(24px, 5vw, 68px);
+  padding-left: max(var(--gutter), calc((100vw - var(--maxw)) / 2 + var(--gutter)));
+}
+
+.about__title {
+  font-family: var(--font-heavy);
+  font-size: clamp(2.1rem, 5.4vw, 3.5rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: #6e6e6e;
+}
+
+.about__body {
+  max-width: 54ch;
+  margin-top: clamp(20px, 3vw, 34px);
+  font-size: clamp(0.92rem, 1.35vw, 1.02rem);
+  line-height: 1.62;
+  color: #2a2a2a;
+  text-align: justify;
+  text-wrap: pretty;
+}
+
+.about__body + .about__body {
+  margin-top: 1.35em;
+}
+
+.about__body strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.about__body .hl-teal {
+  color: var(--teal-ink);
+  font-weight: 600;
+}
+
+.about__body .hl-coral {
+  color: var(--coral-deep);
+  font-weight: 600;
+}
+
+.about__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(10px, 1.6vw, 18px);
+  margin-top: clamp(28px, 4.5vw, 52px);
+}
+
+.pill {
+  padding: 9px 22px;
+  border-radius: 6px;
+  background: var(--ink-3);
+  color: #fff;
+  font-size: clamp(0.82rem, 1.2vw, 0.92rem);
+  font-weight: 400;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
+  transition: transform 0.18s var(--ease), background 0.18s var(--ease);
+}
+
+.pill:hover {
+  background: #2b2b2b;
+  transform: translateY(-2px);
+}
+
+.pill:active {
+  transform: translateY(0);
+}
+
+/* No bottom padding — the figure stands on the panel's lower edge. */
+.about__portrait {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: clamp(20px, 3vw, 40px) clamp(14px, 2.2vw, 34px) 0;
+  overflow: hidden;
+  background: var(--coral);
+}
+
+/* Transparent cut-out, so it sits straight on the coral — `contain` keeps the
+   whole figure rather than cropping the head or shoulders. */
+.about__photo {
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 1;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+/* ===========================================================================
+   SECTION 02 — Projects
+   ========================================================================= */
+
+.projects {
+  position: relative;
+  flex: 1 0 auto;
+  background: var(--ink);
+  padding-top: calc(var(--nav-h) + clamp(34px, 6vh, 68px));
+  padding-bottom: clamp(24px, 5vh, 56px);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.projects__media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 0;
+  border-radius: 0;
+  align-items: flex-start;
+  padding-top: calc(var(--nav-h) + 24px);
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.035) 0 1px,
+      transparent 1px 14px
+    ),
+    linear-gradient(150deg, #232323 0%, #171717 52%, #0d0d0d 100%);
+  color: rgba(255, 255, 255, 0.26);
+}
+
+/* Heavy wash — this page is dense, so the cards and type have to stay legible
+   over whatever image ends up back there. */
+.projects__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 10, 0.84) 0%,
+    rgba(10, 10, 10, 0.9) 55%,
+    rgba(10, 10, 10, 0.94) 100%
+  );
+}
+
+.projects__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(20px, 4vw, 48px);
+  flex-wrap: wrap-reverse;
+}
+
+.tabs {
+  display: flex;
+  gap: clamp(10px, 1.8vw, 24px);
+  padding-bottom: 6px;
+}
+
+.tab {
+  padding: 8px 26px;
+  border-radius: 6px;
+  background: var(--ink-4);
+  color: rgba(255, 255, 255, 0.42);
+  font-size: clamp(0.82rem, 1.2vw, 0.94rem);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+  transition: color 0.2s var(--ease), background 0.2s var(--ease),
+    transform 0.18s var(--ease);
+}
+
+.tab:hover {
+  color: rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+}
+
+.tab--active {
+  background: var(--ink-3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tab--active[data-tone='videos'] {
+  color: var(--coral);
+}
+
+.tab--active[data-tone='programs'] {
+  color: var(--mint);
+}
+
+.projects__titlewrap {
+  text-align: right;
+  margin-left: auto;
+}
+
+.projects__title {
+  font-size: clamp(2.6rem, 9.2vw, 7rem);
+}
+
+.projects__chip {
+  margin-top: -0.5em;
+  margin-right: clamp(10px, 2.4vw, 34px);
+  position: relative;
+  z-index: 2;
+}
+
+/* --- Tools used ---------------------------------------------------------- */
+
+.tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: clamp(10px, 1.8vw, 20px);
+  margin-top: clamp(18px, 3vh, 32px);
+}
+
+.tools__label {
+  font-size: clamp(0.82rem, 1.35vw, 1rem);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.tools__list {
+  display: flex;
+  gap: clamp(8px, 1.1vw, 12px);
+}
+
+.tools__item {
+  display: grid;
+  place-items: center;
+  width: clamp(38px, 4vw, 46px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 9px;
+  background: var(--ink-4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.22s var(--ease), border-color 0.22s var(--ease);
+}
+
+.tools__item:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.tools__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tools__fallback {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* The grid scrolls inside a fixed viewport with a fade-out at the bottom edge,
+   matching the mockup's cropped second row. */
+.projects__scroll {
+  margin-top: clamp(26px, 4.5vh, 48px);
+  max-height: clamp(420px, 56vh, 620px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+/* Only fade the bottom edge when there is actually more content below. */
+.projects__scroll[data-overflow='true'] {
+  padding-bottom: 120px;
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    #000 calc(100% - 150px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    #000 calc(100% - 150px),
+    transparent 100%
+  );
+}
+
+.projects__scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.projects__scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 99px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(20px, 3.4vw, 44px) clamp(18px, 2.6vw, 34px);
+  animation: tab-wipe 0.52s cubic-bezier(0.66, 0, 0.28, 1);
+}
+
+.tools,
+.projects__media {
+  animation: tab-wipe 0.58s cubic-bezier(0.66, 0, 0.28, 1);
+}
+
+/* --- Cards --------------------------------------------------------------- */
+
+.card {
+  margin: 0;
+  min-width: 0;
+}
+
+.card__frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  /* Matches standard 16:9 footage, so nothing gets cropped on playback. */
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--coral);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+
+/* Stay put once a video is playing — a hover lift under the cursor makes the
+   native controls harder to hit. */
+.card__frame:not([data-playing='true']):hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+.card--program .card__frame {
+  background: var(--teal);
+}
+
+.card__frame .ph {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  color: rgba(255, 255, 255, 0.6);
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.08) 0 1px,
+    transparent 1px 13px
+  );
+}
+
+.card__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+/* Thumbnail shown before playback starts. */
+.card__thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Covers the whole box so pressing anywhere on the card starts playback. */
+.card__play {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+
+.card__play svg {
+  width: clamp(44px, 5vw, 58px);
+  height: clamp(44px, 5vw, 58px);
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.4));
+  opacity: 0.9;
+}
+
+.card__frame:hover .card__play svg {
+  transform: scale(1.08);
+  opacity: 1;
+}
+
+/* Title overlay — bottom-left, on every video and program card. */
+.card__overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  padding: 34px 16px 12px;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.42));
+  color: #fff;
+  font-size: clamp(0.8rem, 1.15vw, 0.95rem);
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: left;
+  pointer-events: none;
+  transition: transform 0.25s var(--ease);
+}
+
+/* Lift clear of the native video controls once playback starts. */
+.card__frame[data-playing='true'] .card__overlay {
+  transform: translateY(-38px);
+  background: none;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+}
+
+.card__fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.82);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.card__fallback code {
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.74rem;
+  color: var(--mint);
+}
+
+.card__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 12px;
+  font-size: clamp(0.72rem, 1.05vw, 0.86rem);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.card__award {
+  font-weight: 400;
+}
+
+.card__roles {
+  margin-left: auto;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ===========================================================================
+   SECTION 03 — Let's talk
+   ========================================================================= */
+
+.talk {
+  position: relative;
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  min-height: clamp(560px, 82vh, 780px);
+  padding-top: calc(var(--nav-h) + clamp(30px, 5vh, 56px));
+  padding-bottom: clamp(48px, 7vh, 84px);
+  overflow: hidden;
+  background: #101010;
+  isolation: isolate;
+}
+
+.talk__media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 58% 42%;
+}
+
+/* This photo is shot on white, so the wash has to be heavy for the light type
+   to hold. Darkest on the left where the copy sits; eases right so the figure
+   still reads. */
+.talk__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    95deg,
+    rgba(6, 6, 6, 0.95) 0%,
+    rgba(6, 6, 6, 0.9) 45%,
+    rgba(6, 6, 6, 0.76) 75%,
+    rgba(6, 6, 6, 0.82) 100%
+  );
+}
+
+.talk__inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.talk__title {
+  font-size: clamp(2.6rem, 9vw, 6.6rem);
+  letter-spacing: 0.03em;
+}
+
+.talk__chip {
+  margin-top: -0.42em;
+  margin-left: clamp(6px, 1.4vw, 16px);
+  position: relative;
+  z-index: 2;
+}
+
+.talk__block {
+  margin-top: clamp(30px, 5vh, 58px);
+}
+
+.talk__label {
+  color: var(--mint);
+  font-size: clamp(0.95rem, 1.6vw, 1.16rem);
+  font-weight: 400;
+}
+
+.talk__list {
+  display: grid;
+  gap: clamp(8px, 1.4vh, 14px);
+  margin-top: clamp(12px, 2vh, 20px);
+}
+
+.talk__list--socials {
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  column-gap: clamp(28px, 6vw, 84px);
+}
+
+.talk__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  width: fit-content;
+  padding: 4px 2px;
+  font-size: clamp(0.9rem, 1.4vw, 1.02rem);
+  color: rgba(255, 255, 255, 0.92);
+  transition: color 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.talk__item:hover {
+  color: var(--mint);
+  transform: translateX(3px);
+}
+
+.talk__item svg {
+  flex: none;
+  width: 24px;
+  height: 24px;
+}
+
+/* Decorative block composition, bled to the right edge of the section. */
+.talk__shapes {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  width: min(42vw, 460px);
+  height: clamp(300px, 62%, 500px);
+  pointer-events: none;
+}
+
+.shape {
+  position: absolute;
+  border-radius: 2px;
+}
+
+.shape--mint-top {
+  top: 0;
+  right: 0;
+  width: 52%;
+  height: 30%;
+  background: var(--mint);
+}
+
+.shape--coral {
+  top: 24%;
+  right: 0;
+  width: 84%;
+  height: 76%;
+  background: var(--coral);
+}
+
+.shape--cream {
+  top: 33%;
+  right: 17%;
+  width: 55%;
+  height: 67%;
+  background: var(--cream);
+}
+
+.shape--mint-small {
+  bottom: 0;
+  right: 86%;
+  width: 12%;
+  height: 33%;
+  background: var(--mint);
+}
+
+/* ===========================================================================
+   Modal — Education / Experience
+   ========================================================================= */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(6, 6, 6, 0.72);
+  backdrop-filter: blur(5px);
+  animation: fade-in 0.22s var(--ease);
+}
+
+.modal__panel {
+  position: relative;
+  width: min(620px, 100%);
+  max-height: min(80vh, 640px);
+  overflow-y: auto;
+  padding: clamp(28px, 4vw, 44px);
+  border-radius: 14px;
+  background: var(--cream);
+  color: var(--ink);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  animation: pop-in 0.26s var(--ease);
+}
+
+.modal__title {
+  font-family: var(--font-heavy);
+  font-size: clamp(1.4rem, 3.2vw, 2rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--teal-ink);
+  /* Clear of the × in the corner. */
+  padding-right: 48px;
+  margin-bottom: clamp(18px, 2.6vw, 26px);
+}
+
+.modal__group + .modal__group {
+  margin-top: clamp(22px, 3vw, 30px);
+}
+
+/* Sub-label inside a panel — body copy, just bold. */
+.modal__group-title {
+  font-size: clamp(1.1rem, 1.55vw, 1.3rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.modal__entries {
+  display: grid;
+  gap: clamp(13px, 1.9vw, 18px);
+}
+
+.modal__group-title + .modal__entries {
+  margin-top: clamp(10px, 1.5vw, 14px);
+}
+
+.modal__entry-title {
+  font-size: clamp(0.9rem, 1.3vw, 1rem);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.modal__entry-meta {
+  margin-top: 3px;
+  font-size: clamp(0.8rem, 1.15vw, 0.88rem);
+  font-weight: 400;
+  line-height: 1.45;
+  color: #6b6b6b;
+}
+
+.modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--ink-3);
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: background 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.modal__close:hover {
+  background: var(--coral);
+  transform: rotate(90deg);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+
+/* ===========================================================================
+   Responsive — the mockup layout holds down to phone widths, then stacks.
+   ========================================================================= */
+
+@media (max-width: 860px) {
+  :root {
+    --nav-h: 62px;
+  }
+
+  .hero {
+    min-height: 78vh;
+  }
+
+  .hero__inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .hero__tagline {
+    padding-bottom: 0;
+  }
+
+  .hero__badge {
+    bottom: 0;
+  }
+
+  .about {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .about__copy,
+  .about__portrait {
+    padding-inline: var(--gutter);
+  }
+
+  /* Stacked layout leaves the figure marooned in a tall coral block. Let it
+     break out of the top instead, pinned right so the copy stays clear. */
+  .about__portrait {
+    position: relative;
+    justify-content: flex-end;
+    overflow: visible;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-right: var(--gutter);
+  }
+
+  .about__photo {
+    max-width: min(72%, 340px);
+    margin-top: clamp(-200px, -30vw, -96px);
+  }
+
+  /* Narrow crops cut in from the sides — nudge both photos so the subject
+     survives instead of the background. */
+  .hero__media {
+    object-position: 44% 50%;
+  }
+
+  .talk__media {
+    object-position: 62% 38%;
+  }
+
+  /* Copy runs full width on phones, so the wash has to be even rather than
+     weighted to one side. */
+  .talk__scrim {
+    background: linear-gradient(
+      180deg,
+      rgba(6, 6, 6, 0.9) 0%,
+      rgba(6, 6, 6, 0.86) 55%,
+      rgba(6, 6, 6, 0.93) 100%
+    );
+  }
+
+  .about__body {
+    text-align: left;
+  }
+
+  .projects__head {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 22px;
+  }
+
+  .projects__titlewrap {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .projects__chip {
+    margin-right: 0;
+    margin-left: clamp(8px, 2vw, 18px);
+  }
+
+  /* Full height on phones — nothing hidden behind a fade. */
+  .projects__scroll,
+  .projects__scroll[data-overflow='true'] {
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .talk {
+    min-height: 0;
+    /* Keep the copy clear of the shape stack once it sits behind the text. */
+    padding-bottom: clamp(190px, 30vh, 280px);
+  }
+
+  .talk__shapes {
+    width: min(58vw, 250px);
+    height: clamp(190px, 30vh, 270px);
+  }
+}
+
+@media (max-width: 460px) {
+  .talk__list--socials {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .card__overlay {
+    padding: 28px 12px 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

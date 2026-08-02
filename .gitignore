@@ -1,0 +1,7 @@
+node_modules
+dist
+assets-original
+dist-ssr
+*.local
+.DS_Store
+.vite

@@ -1,0 +1,36 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Vite fingerprints these filenames, so they can never go stale.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Media filenames are stable (1.mp4, bg.jpg…), so keep the window short enough
+# that replacing a clip or photo shows up without visitors hard-refreshing.
+[[headers]]
+  for = "/videos/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/tools/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# Routing is hash-based (#/home), so every request already lands on "/". This
+# is here so deep links keep working if the router ever moves to real paths.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
