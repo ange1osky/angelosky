@@ -1239,6 +1239,12 @@ ul {
     padding-inline: var(--gutter);
   }
 
+  /* Clearance for the portrait, which rises out of the coral below. Without it
+     the figure lands on the Education / Experience buttons and blocks taps. */
+  .about__copy {
+    padding-bottom: clamp(150px, 36vw, 210px);
+  }
+
   /* Stacked layout leaves the figure marooned in a tall coral block. Let it
      break out of the top instead, pinned right so the copy stays clear. */
   .about__portrait {
