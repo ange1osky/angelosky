@@ -46,7 +46,7 @@ export default function Home() {
 
       <div className="about">
         <div className="about__copy">
-          <h2 className="about__title">KINSA MANI?</h2>
+          <h2 className="about__title">ABOUT ME</h2>
 
           <p className="about__body">
             I am <strong>Angelo C. Balane</strong>, an 18 year old student from the
@@ -73,7 +73,7 @@ export default function Home() {
         <div className="about__portrait">
           <img
             className="about__photo"
-            src="/images/aboutpic.png"
+            src="/images/aboutpic.webp"
             alt="Angelo C. Balane"
           />
         </div>

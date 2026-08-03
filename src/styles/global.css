@@ -26,6 +26,7 @@
   /* Drives both the "2026" type size and the hero padding that clears it. */
   --year-size: clamp(3.4rem, 12vw, 9.2rem);
   --badge-h: calc(var(--year-size) * 0.86);
+  
 
   --font: 'Poppins', 'Century Gothic', 'Segoe UI', system-ui, sans-serif;
   --font-heavy: 'Archivo Black', 'Arial Black', 'Poppins', sans-serif;
@@ -248,6 +249,12 @@ ul {
   width: 100%;
 }
 
+.nav__left {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.4vw, 16px);
+}
+
 .nav__brand {
   font-size: clamp(0.9rem, 1.6vw, 1.05rem);
   font-weight: 400;
@@ -258,6 +265,125 @@ ul {
 
 .nav__brand:hover {
   opacity: 0.7;
+}
+
+/* --- Music toggle -------------------------------------------------------- */
+
+/* Coral for playing — it already means "active" everywhere else on the site,
+   and warm reads as sound. Blue for off, picked cool and a touch desaturated so
+   the two states differ in hue rather than just brightness; a colourblind
+   visitor still gets the knob position as a second signal. */
+.music {
+  --music-off: #4aa8e0;
+  --music-on: var(--coral);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border-radius: 99px;
+}
+
+.music__switch {
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 26px;
+  border-radius: 99px;
+  background: var(--music-off);
+  transition: background 0.32s var(--ease), box-shadow 0.32s var(--ease);
+}
+
+.music[data-playing='true'] .music__switch {
+  background: var(--music-on);
+  /* Just enough bloom to catch the eye when it flips, without becoming a
+     second focus ring next to the real one. */
+  box-shadow: 0 0 0 1px rgba(253, 110, 96, 0.4), 0 2px 12px rgba(253, 110, 96, 0.34);
+}
+
+.music__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--music-off);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.32);
+  /* Transform only — animating `left` would lay out the nav on every frame.
+     The squash below rides on the same property, so it has to be composed into
+     these transforms rather than set separately. */
+  transform: translateX(0) scaleX(1);
+  transform-origin: left center;
+  transition: transform 0.34s var(--ease), color 0.32s var(--ease);
+}
+
+.music[data-playing='true'] .music__knob {
+  transform: translateX(20px) scaleX(1);
+  /* Anchored to the trailing edge in each direction, so the stretch always
+     runs back along the travel instead of pushing past the track's inset. */
+  transform-origin: right center;
+  color: var(--music-on);
+}
+
+.music__knob svg {
+  width: 13px;
+  height: 13px;
+}
+
+.music:hover .music__switch {
+  filter: brightness(1.08);
+}
+
+/* Stretches toward where it came from, like a physical switch under thumb. */
+.music:active .music__knob {
+  transform: translateX(0) scaleX(1.16);
+}
+
+.music[data-playing='true']:active .music__knob {
+  transform: translateX(20px) scaleX(1.16);
+}
+
+/* On, but a video has the speakers. Stays unmistakably in the ON position —
+   that is still the visitor's choice — just drained of its glow. */
+.music[data-yielded='true'] .music__switch {
+  background: rgba(253, 110, 96, 0.42);
+  box-shadow: none;
+}
+
+.music[data-yielded='true'] .music__knob {
+  color: rgba(253, 110, 96, 0.75);
+}
+
+.music__label {
+  font-size: clamp(0.74rem, 1.15vw, 0.84rem);
+  font-weight: 400;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.62);
+  white-space: nowrap;
+  transition: color 0.24s var(--ease);
+}
+
+.music__artist {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.music:hover .music__label {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* Kept next to the component rather than in the breakpoint blocks at the
+   bottom: this one is about the track name's own width, not the page layout.
+   The nav runs out of room for brand + three links + a song title well before
+   the 460px phone breakpoint, so it gets its own threshold. */
+@media (max-width: 620px) {
+  .music__label {
+    display: none;
+  }
 }
 
 .nav__links {
@@ -440,7 +566,7 @@ ul {
   width: min(78%, 420px);
   height: calc(76% + 48px);
   border-radius: 14px 0 0 0;
-  background: rgba(253, 110, 96, 0.55);
+  background: rgba(253, 110, 96, 0.25);
 }
 
 .hero__year {
@@ -451,6 +577,7 @@ ul {
   letter-spacing: -0.02em;
   color: var(--coral);
   text-shadow: 0 6px 34px rgba(0, 0, 0, 0.4);
+  transform: translateY(0.1em);
 }
 
 .hero__edition {
@@ -461,6 +588,7 @@ ul {
   font-weight: 300;
   line-height: 0.9;
   letter-spacing: 0.005em;
+  transform: translateY(0.35em);
   /* Full-strength coral over the 55% panel, so it reads brighter than the
      block behind it rather than contrasting against it. */
   color: var(--coral);
@@ -566,6 +694,7 @@ ul {
   aspect-ratio: 1;
   object-fit: contain;
   object-position: center bottom;
+  filter: drop-shadow(4px 4px 6px rgba(12, 7, 7, 0.55));
 }
 
 /* ===========================================================================
@@ -1343,6 +1472,12 @@ ul {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* The knob still has to land in the right place — the blanket rule only
+     removes the travel between the two positions, which is the point. */
+  .music__knob {
     transition-duration: 0.01ms !important;
   }
 }

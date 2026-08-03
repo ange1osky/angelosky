@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { PlayIcon } from './Icons.jsx'
+import { claimAudio, releaseAudio } from '../hooks/useAudioFocus.js'
 
 /* Thumbnail until it is pressed; then the <video> mounts and plays. The title
    overlay stays pinned bottom-left throughout, lifting clear of the native
@@ -49,6 +50,11 @@ export default function VideoCard({ item, activeId, onActivate }) {
     if (activeId && activeId !== item.id) videoRef.current?.pause()
   }, [activeId, item.id])
 
+  /* Switching tabs or leaving the page tears the player down without ever
+     firing a pause, so the claim has to be dropped here too — otherwise the
+     music stays muted for the rest of the session. */
+  useEffect(() => () => releaseAudio(item.id), [item.id])
+
   return (
     <figure className="card card--video">
       {/* `playing` = the player is mounted; `live` = it is actually rolling.
@@ -70,13 +76,24 @@ export default function VideoCard({ item, activeId, onActivate }) {
             controlsList="nodownload noplaybackrate"
             disablePictureInPicture
             onContextMenu={(e) => e.preventDefault()}
-            /* Fires for the native control too, not just our play button. */
+            /* Fires for the native control too, not just our play button.
+               Claiming here rather than in `start` covers every route into
+               playback — our button, the native controls, and the scroll-away
+               observer that pauses it again. */
             onPlay={() => {
               setPaused(false)
               onActivate?.(item.id)
+              claimAudio(item.id)
             }}
-            onPause={() => setPaused(true)}
-            onError={() => setFailed(true)}
+            onPause={() => {
+              setPaused(true)
+              releaseAudio(item.id)
+            }}
+            onEnded={() => releaseAudio(item.id)}
+            onError={() => {
+              setFailed(true)
+              releaseAudio(item.id)
+            }}
           />
         ) : (
           <>

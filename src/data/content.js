@@ -4,13 +4,24 @@
  * ------------------------------------------------------------------------- */
 
 export const BRAND = 'angelosky'
-export const COPYRIGHT = '© 2026 | ange1osky'
+export const COPYRIGHT = '© 2026 | angelosky'
 
 export const SECTIONS = [
   { id: 'home', label: 'Home' },
   { id: 'projects', label: 'Projects' },
   { id: 'contacts', label: 'Contacts' },
 ]
+
+/* Background track behind the whole site, toggled from the nav.
+ * `src`    — the audio file in `public/audio/`. Leave '' and the nav toggle
+ *            disappears entirely, so the site is fine without one.
+ * `artist` — shown in bold beside the switch, and read out to screen readers.
+ * `track`  — shown lighter after it. Both hide on narrow screens.
+ * `volume` — 0 to 1, NOT 0 to 100. Anything above 1 is clamped to full. */
+export const MUSIC = {
+  src: '/audio/lane8-you.mp3',
+  volume: 0.45,
+}
 
 /* --- Home ---------------------------------------------------------------- */
 
@@ -39,10 +50,10 @@ export const PANELS = {
         items: [
           {
             title: 'BS Computer Science: Cebu Institute of Technology - University',
-            meta: 'Upcoming Freshman',
+            meta: 'Freshman',
           },
           {
-            title: 'TVL ICT: Tagbilaran City Science High School',
+            title: 'Information Communication Technology: Tagbilaran City Science High School',
             meta: '2020-2026',
           },
         ],
@@ -53,14 +64,14 @@ export const PANELS = {
     heading: 'Experience',
     groups: [
       {
-        title: 'TECHNOLOGY',
+        title: 'TECH',
         items: [{ title: 'TESDA National Certificate II in CSS', meta: 'Awardee' }],
       },
       {
         title: 'CREATIVE',
         items: [
-          { title: 'Oculus Multimedia Club 2025-2026', meta: 'Editor / Videographer' },
-          { title: 'TCSHS Supreme Student Government 2024-2026', meta: 'Layout Artist' },
+          { title: 'Oculus Multimedia Club 25-26', meta: 'Producer / Editor / Videographer' },
+          { title: 'TCSHS Supreme Student Learning Government 24-26', meta: 'Layout Artist' },
         ],
       },
     ],
@@ -103,7 +114,7 @@ export const PROGRAMS = [
     award: 'Top 38% out of 10,000+ entries - Top 19% in Art Category',
     roles: 'Artist',
     href: 'https://boys-at-the-back.itch.io/goblin-alarm',
-    image: '/images/titlebg.png',
+    image: '/images/titlebg.webp',
   },
 ]
 
@@ -117,7 +128,7 @@ export const TABS = [
  * Set both to the same path if you want one background across both tabs. */
 export const PROJECT_BACKDROPS = {
   videos: '/images/videosbg.jpg',
-  programs: '/images/programbg.jpg',
+  programs: '/images/programbg.webp',
 }
 
 /* Shown under the tabs, keyed by tab id — each tab lists its own tools.
@@ -127,12 +138,12 @@ export const TOOLS_LABEL = 'TOOLS USED:'
 
 export const TOOLS = {
   videos: [
-    { id: 'davinci', name: 'DaVinci Resolve Studio', icon: '/tools/davinci-resolve.png' },
-    { id: 'ibispaint', name: 'ibisPaint X', icon: '/tools/ibispaint.jpg' },
+    { id: 'davinci', name: 'DaVinci Resolve Studio', icon: '/tools/davinci-resolve.webp' },
+    { id: 'ibispaint', name: 'ibisPaint X', icon: '/tools/ibispaint.webp' },
   ],
   programs: [
-    { id: 'canva', name: 'Canva', icon: '/tools/canva.jpg' },
-    { id: 'ibispaint', name: 'ibisPaint X', icon: '/tools/ibispaint.jpg' },
+    { id: 'canva', name: 'Canva', icon: '/tools/canva.webp' },
+    { id: 'ibispaint', name: 'ibisPaint X', icon: '/tools/ibispaint.webp' },
   ],
 }
 
@@ -142,7 +153,7 @@ export const CONTACT = {
   title: "LET'S TALK",
   page: 'PAGE 03',
   inquiriesLabel: 'For inquires, catch me through:',
-  followLabel: 'My other socials',
+  followLabel: 'My other socials:',
 }
 
 /* Rows under "For inquires". `id` picks the icon from ICONS in Icons.jsx —

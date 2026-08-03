@@ -59,6 +59,24 @@ export function GithubIcon(props) {
   )
 }
 
+/* Rides inside the toggle knob at ~13px, so it carries a heavier stroke than
+   the contact icons — 1.7 disappears at that size. */
+export function HeadphonesIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path
+        d="M4.4 15.2v-3a7.6 7.6 0 0 1 15.2 0v3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      <rect x="2" y="14" width="4.8" height="7.2" rx="2.4" fill="currentColor" />
+      <rect x="17.2" y="14" width="4.8" height="7.2" rx="2.4" fill="currentColor" />
+    </svg>
+  )
+}
+
 export function PlayIcon(props) {
   return (
     <svg viewBox="0 0 64 64" aria-hidden="true" {...props}>
