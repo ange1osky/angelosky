@@ -187,9 +187,8 @@ ul {
 
 .page-chip {
   display: inline-block;
-  padding: 3px 12px 4px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.55);
+  padding: 3px 52px 1px;
+  background: rgba(0, 0, 0, 0.15);
   color: var(--coral);
   font-size: clamp(0.62rem, 1vw, 0.78rem);
   font-weight: 500;
@@ -519,6 +518,8 @@ ul {
 .hero__title {
   font-size: clamp(3rem, 11.5vw, 9rem);
   margin-top: 2px;
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
 }
 
 .hero__chip {
@@ -557,33 +558,26 @@ ul {
   padding-right: clamp(14px, 3vw, 40px);
 }
 
-.hero__badge-panel {
-  position: absolute;
-  right: 0;
-  /* Overshoots the hero's bottom edge — .hero clips it, so the panel always
-     lands flush against the coral block below with no hairline gap. */
-  bottom: -48px;
-  width: min(78%, 420px);
-  height: calc(76% + 48px);
-  border-radius: 14px 0 0 0;
-  background: rgba(253, 110, 96, 0.25);
-}
 
 .hero__year {
   position: relative;
   font-size: var(--year-size);
   font-weight: 800;
   line-height: 0.82;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.1em;
+  /* letter-spacing also trims 0.1em off the trailing "6"; add it back so
+     "edition" can't slide over the last digit and clip it. */
+  padding-right: 0.12em;
   color: var(--coral);
-  text-shadow: 0 6px 34px rgba(0, 0, 0, 0.4);
   transform: translateY(0.1em);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
 }
 
 .hero__edition {
   position: relative;
   padding-bottom: clamp(4px, 1.2vw, 14px);
-  margin-left: -0.04em;
+  margin-left: 0;
   font-size: clamp(1.6rem, 5.6vw, 4.3rem);
   font-weight: 300;
   line-height: 0.9;
@@ -592,6 +586,8 @@ ul {
   /* Full-strength coral over the 55% panel, so it reads brighter than the
      block behind it rather than contrasting against it. */
   color: var(--coral);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
 }
 
 /* --- About split --------------------------------------------------------- */
@@ -657,6 +653,7 @@ ul {
 }
 
 .pill {
+  display: inline-block;
   padding: 9px 22px;
   border-radius: 6px;
   background: var(--ink-3);
@@ -705,7 +702,7 @@ ul {
   position: relative;
   flex: 1 0 auto;
   background: var(--ink);
-  padding-top: calc(var(--nav-h) + clamp(34px, 6vh, 68px));
+  padding-top: calc(var(--nav-h) + clamp(30px, 5vh, 56px));
   padding-bottom: clamp(24px, 5vh, 56px);
   overflow: hidden;
   isolation: isolate;
@@ -718,6 +715,10 @@ ul {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Source is wider than the tab, so cover crops the sides. Bias left to keep
+     the bright, sharp colour wheel + RGB labels in frame and trim the dark
+     bokeh on the right. (Shared by both tab backdrops.) */
+  object-position: 35% 50%;
   border: 0;
   border-radius: 0;
   align-items: flex-start;
@@ -740,8 +741,11 @@ ul {
   z-index: -1;
   background: linear-gradient(
     180deg,
-    rgba(10, 10, 10, 0.84) 0%,
-    rgba(10, 10, 10, 0.9) 55%,
+    rgba(10, 10, 10, 0.85) 0%,
+    rgba(10, 10, 10, 0.82) 12%,
+    rgba(10, 10, 10, 0.6) 28%,
+    rgba(10, 10, 10, 0.8) 50%,
+    rgba(10, 10, 10, 0.9) 65%,
     rgba(10, 10, 10, 0.94) 100%
   );
 }
@@ -759,34 +763,79 @@ ul {
   gap: clamp(10px, 1.8vw, 24px);
   padding-bottom: 6px;
 }
-
 .tab {
-  padding: 8px 26px;
-  border-radius: 6px;
-  background: var(--ink-4);
-  color: rgba(255, 255, 255, 0.42);
+  --tab-tone: var(--mint);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 24px 8px 19px;
+  border-radius: 10px;
   font-size: clamp(0.82rem, 1.2vw, 0.94rem);
-  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
-  transition: color 0.2s var(--ease), background 0.2s var(--ease),
-    transform 0.18s var(--ease);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.62);
+  background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.06),
+      rgba(255, 255, 255, 0.015)
+    ),
+    color-mix(in srgb, var(--tab-tone) 5%, rgba(18, 18, 18, 0.5));
+  border: 1px solid color-mix(in srgb, var(--tab-tone) 16%, transparent);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.22s var(--ease), border-color 0.22s var(--ease),
+    background 0.22s var(--ease), color 0.22s var(--ease),
+    box-shadow 0.22s var(--ease);
+}
+
+/* Each tab keeps the tone it already had — only the treatment changed. */
+.tab[data-tone='videos'] {
+  --tab-tone: var(--coral);
+}
+
+.tab[data-tone='programs'] {
+  --tab-tone: var(--mint);
+}
+
+.tab::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 10%;
+  background: var(--tab-tone);
+  opacity: 0.45;
+  transition: opacity 0.22s var(--ease), box-shadow 0.22s var(--ease);
 }
 
 .tab:hover {
-  color: rgba(255, 255, 255, 0.8);
   transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--tab-tone) 44%, transparent);
+  color: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
+.tab:hover::before {
+  opacity: 0.8;
+}
+
+/* Selected: full tone strength, and the dot picks up its glow. */
 .tab--active {
-  background: var(--ink-3);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.09),
+      rgba(255, 255, 255, 0.02)
+    ),
+    color-mix(in srgb, var(--tab-tone) 15%, rgba(18, 18, 18, 0.55));
+  border-color: color-mix(in srgb, var(--tab-tone) 55%, transparent);
 }
 
-.tab--active[data-tone='videos'] {
-  color: var(--coral);
-}
-
-.tab--active[data-tone='programs'] {
-  color: var(--mint);
+.tab--active::before {
+  opacity: 1;
+  box-shadow: 0 0 9px color-mix(in srgb, var(--tab-tone) 75%, transparent);
 }
 
 .projects__titlewrap {
@@ -796,6 +845,8 @@ ul {
 
 .projects__title {
   font-size: clamp(2.6rem, 9.2vw, 7rem);
+    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
 }
 
 .projects__chip {
@@ -828,18 +879,19 @@ ul {
 }
 
 .tools__item {
+  position: relative;
   display: grid;
   place-items: center;
-  width: clamp(38px, 4vw, 46px);
+  width: clamp(32px, 3.4vw, 39px);
   aspect-ratio: 1;
-  overflow: hidden;
-  border-radius: 9px;
+  border-radius: 8px;
   background: var(--ink-4);
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: transform 0.22s var(--ease), border-color 0.22s var(--ease);
 }
 
-.tools__item:hover {
+.tools__item:hover,
+.tools__item:focus-visible {
   transform: translateY(-3px);
   border-color: rgba(255, 255, 255, 0.28);
 }
@@ -848,12 +900,105 @@ ul {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Rounding lives on the image now (was `overflow: hidden` on the tile) so the
+     hover tooltip can escape the tile instead of being clipped by it. */
+  border-radius: 8px;
 }
 
 .tools__fallback {
   font-size: 1.05rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.65);
+}
+
+/* Name tooltip, revealed above the logo on hover / keyboard focus. */
+.tools__name {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: rgba(13, 13, 13, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s var(--ease), transform 0.18s var(--ease);
+  z-index: 5;
+}
+
+/* Little caret pointing down at the tile. */
+.tools__name::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(13, 13, 13, 0.96);
+}
+
+.tools__item:hover .tools__name,
+.tools__item:focus-visible .tools__name {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* --- Program categories -------------------------------------------------- */
+
+/* The row itself reuses .tools, so the label, spacing and tab-wipe animation
+   match the Videos tab exactly — only the chips differ from the logo tiles. */
+.cats__list {
+  --cat-accent: var(--mint);
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(8px, 1.1vw, 12px);
+}
+
+/* Accents alternate down the row, so a new category is styled the moment it is
+   added. Set on the <li> rather than the chip itself: the chip is an only
+   child, so :nth-child on it would always match odd. Add a third selector here
+   if you ever want a third colour in play. */
+.cats__list > li:nth-child(odd) {
+  --cat-accent: var(--mint);
+}
+
+.cats__list > li:nth-child(even) {
+  --cat-accent: var(--coral);
+}
+
+/* Flat plate on a hard bottom shadow, lifting on hover. Unselected chips are
+   grey and only the selected one takes its accent, so the accent itself is the
+   selection cue. Border is transparent rather than absent, so gaining one when
+   selected does not shift the row by a pixel. */
+.cats__item {
+  padding: 8px 26px;
+  border-radius: 6px;
+  background: var(--ink-4);
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: clamp(0.76rem, 1.1vw, 0.86rem);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+  transition: color 0.2s var(--ease), background 0.2s var(--ease),
+    border-color 0.2s var(--ease), transform 0.18s var(--ease);
+}
+
+.cats__item:hover {
+  color: rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+}
+
+.cats__item--active {
+  background: var(--ink-3);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: var(--cat-accent);
 }
 
 /* The grid scrolls inside a fixed viewport with a fade-out at the bottom edge,
@@ -898,6 +1043,24 @@ ul {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(20px, 3.4vw, 44px) clamp(18px, 2.6vw, 34px);
   animation: tab-wipe 0.52s cubic-bezier(0.66, 0, 0.28, 1);
+}
+
+/* Shown when the selected category has nothing filed under it yet. Spans the
+   full grid so it centres against the row of cards it stands in for. */
+.grid__empty {
+  grid-column: 1 / -1;
+  display: grid;
+  place-items: center;
+  min-height: clamp(160px, 22vh, 240px);
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: clamp(0.72rem, 1.1vw, 0.84rem);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .tools,
@@ -954,6 +1117,26 @@ ul {
   height: 100%;
   object-fit: cover;
   background: #000;
+}
+
+/* In the grid the player fills a fixed 16:9 frame, so footage shot in another
+   ratio is cropped to fit — deliberate, it keeps the cards uniform. Fullscreen
+   has to undo it and letterbox each file to its own dimensions instead: 5, 7
+   and 9 are 2.35:1 and lose their edges to `cover`, 18 is 4:3 and loses its top
+   and bottom. The browser's own fullscreen sheet asks for `contain`, but it
+   does so without !important, so the rule above outranks it and the crop
+   survives — this puts it back. One rule per prefix: a selector list
+   containing a pseudo-class the browser doesn't know is dropped whole. */
+.card__video:fullscreen {
+  object-fit: contain;
+}
+
+.card__video:-webkit-full-screen {
+  object-fit: contain;
+}
+
+.card__video:-moz-full-screen {
+  object-fit: contain;
 }
 
 /* Thumbnail shown before playback starts. */
@@ -1119,7 +1302,16 @@ ul {
 .talk__title {
   font-size: clamp(2.6rem, 9vw, 6.6rem);
   letter-spacing: 0.03em;
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
 }
+
+/* "AWAITS" styled apart from "THE NEXT STEP". */
+.talk__title-accent {
+  color: var(--coral);
+  font-weight: 600;
+}
+
 
 .talk__chip {
   margin-top: -0.42em;
@@ -1269,6 +1461,7 @@ ul {
 .modal__group-title {
   font-size: clamp(1.1rem, 1.55vw, 1.3rem);
   font-weight: 800;
+  letter-spacing: -0.05em;
   line-height: 1.2;
   color: var(--ink);
 }
@@ -1276,6 +1469,10 @@ ul {
 .modal__entries {
   display: grid;
   gap: clamp(13px, 1.9vw, 18px);
+  /* Indented under the group title, with a coral "arm" running down the
+     left edge to visually tie the entries to their heading. */
+  padding-left: clamp(14px, 2vw, 20px);
+  border-left: 2px solid var(--coral);
 }
 
 .modal__group-title + .modal__entries {
@@ -1418,6 +1615,10 @@ ul {
   .projects__head {
     flex-direction: column-reverse;
     align-items: flex-start;
+    /* Reset the desktop wrap-reverse: with a column direction it flips the
+       cross-axis, so flex-start would right-align the tabs/title instead of
+       left. nowrap keeps them stacked and left-aligned above the tools row. */
+    flex-wrap: nowrap;
     gap: 22px;
   }
 

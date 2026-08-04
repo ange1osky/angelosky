@@ -11,7 +11,7 @@ export default function ToolsUsed({ tools }) {
 
       <ul className="tools__list">
         {tools.map((tool) => (
-          <li key={tool.id} className="tools__item" title={tool.name}>
+          <li key={tool.id} className="tools__item" tabIndex={0}>
             {tool.icon ? (
               <img src={tool.icon} alt={tool.name} loading="lazy" />
             ) : (
@@ -19,6 +19,7 @@ export default function ToolsUsed({ tools }) {
                 {tool.name.charAt(0)}
               </span>
             )}
+            <span className="tools__name">{tool.name}</span>
           </li>
         ))}
       </ul>

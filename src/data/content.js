@@ -19,7 +19,7 @@ export const SECTIONS = [
  * `track`  — shown lighter after it. Both hide on narrow screens.
  * `volume` — 0 to 1, NOT 0 to 100. Anything above 1 is clamped to full. */
 export const MUSIC = {
-  src: '/audio/lane8-you.mp3',
+  src: '/audio/music.mp3',
   volume: 0.45,
 }
 
@@ -50,11 +50,24 @@ export const PANELS = {
         items: [
           {
             title: 'BS Computer Science: Cebu Institute of Technology - University',
-            meta: 'Freshman',
+            meta: '2026',
           },
           {
             title: 'Information Communication Technology: Tagbilaran City Science High School',
             meta: '2020-2026',
+          },
+        ],
+      },
+      {
+        title: 'CERTIFICATIONS & SCHOLARSHIPS',
+        items: [
+          {
+            title: 'TESDA National Certificate II in Computer Systems Servicing',
+            meta: 'NC II Holder',
+          },
+          {
+            title: 'Department of Science and Technology - Science Education Institute',
+            meta: 'Scholar',
           },
         ],
       },
@@ -63,10 +76,6 @@ export const PANELS = {
   experience: {
     heading: 'Experience',
     groups: [
-      {
-        title: 'TECH',
-        items: [{ title: 'TESDA National Certificate II in CSS', meta: 'Awardee' }],
-      },
       {
         title: 'CREATIVE',
         items: [
@@ -106,16 +115,33 @@ export const VIDEOS = [
   { id: 'v19', title: 'Graduation Music Video: Before We Go', award: '', roles: 'Director // Videographer // Editor', src: '/videos/19.mp4', poster: '/images/thumbs/19.png' },
 ]
 
-/* Each card is a link — swap `href` for the real destination. */
+/* Each card is a link — swap `href` for the real destination.
+ * `category` — what kind of project it is, listed in the row under the tabs.
+ *              Reuse an existing string to file a project under that category;
+ *              write a new one and the category appears on its own. */
 export const PROGRAMS = [
   {
     id: 'p1',
     title: 'GMTK Game Jam 2026: Goblin Alarm',
+    category: 'Game Development',
     award: 'Top 38% out of 10,000+ entries - Top 19% in Art Category',
     roles: 'Artist',
     href: 'https://boys-at-the-back.itch.io/goblin-alarm',
     image: '/images/titlebg.webp',
   },
+]
+
+/* Categories listed here show up in display order, and may be listed before
+ * any project uses them — that's how a category appears while its first
+ * project is still in progress. Anything used by a program but missing here is
+ * appended automatically, so a new `category` can never go unlisted. */
+const DECLARED_CATEGORIES = ['Game Development', 'Web Development']
+
+export const PROGRAM_CATEGORIES = [
+  ...new Set([
+    ...DECLARED_CATEGORIES,
+    ...PROGRAMS.map((p) => p.category).filter(Boolean),
+  ]),
 ]
 
 export const TABS = [
@@ -128,21 +154,19 @@ export const TABS = [
  * Set both to the same path if you want one background across both tabs. */
 export const PROJECT_BACKDROPS = {
   videos: '/images/videosbg.jpg',
-  programs: '/images/programbg.webp',
+  programs: '/images/programbg.jpg',
 }
 
-/* Shown under the tabs, keyed by tab id — each tab lists its own tools.
+/* Shown under the tabs, keyed by tab id. Only the Videos tab lists tools —
+ * Programs shows its categories there instead, see PROGRAM_CATEGORIES above.
  * Drop logo files in `public/tools/` and point `icon` at them. A tool with no
  * icon falls back to a lettered tile. */
 export const TOOLS_LABEL = 'TOOLS USED:'
 
 export const TOOLS = {
   videos: [
-    { id: 'davinci', name: 'DaVinci Resolve Studio', icon: '/tools/davinci-resolve.webp' },
-    { id: 'ibispaint', name: 'ibisPaint X', icon: '/tools/ibispaint.webp' },
-  ],
-  programs: [
-    { id: 'canva', name: 'Canva', icon: '/tools/canva.webp' },
+    { id: 'davinci', name: 'DaVinci Resolve', icon: '/tools/davinci-resolve.webp' },
+    { id: 'capcut', name: 'CapCut', icon: '/tools/capcut.png' },
     { id: 'ibispaint', name: 'ibisPaint X', icon: '/tools/ibispaint.webp' },
   ],
 }
@@ -150,7 +174,8 @@ export const TOOLS = {
 /* --- Contacts ------------------------------------------------------------ */
 
 export const CONTACT = {
-  title: "LET'S TALK",
+  title: 'THE NEXT STEP',
+  titleAccent: 'AWAITS',
   page: 'PAGE 03',
   inquiriesLabel: 'For inquires, catch me through:',
   followLabel: 'My other socials:',

@@ -28,7 +28,10 @@ export default function Contact() {
         <div className="talk__scrim" aria-hidden="true" />
 
         <div className="shell talk__inner">
-          <h2 className="display talk__title">{CONTACT.title}</h2>
+          <h2 className="display talk__title">
+            {CONTACT.title}{' '}
+            <span className="talk__title-accent">{CONTACT.titleAccent}</span>
+          </h2>
           <span className="page-chip talk__chip">{CONTACT.page}</span>
 
           <div className="talk__block">
