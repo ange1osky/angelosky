@@ -3,7 +3,7 @@ import { useState } from 'react'
 // Sound played on enter. Drop your clip at public/audio/intro.mp3 (restart the
 // dev server after adding it — Vite ignores public/). If it's missing, the
 // intro is silent; nothing breaks.
-const SFX_SRC = '/audio/intro.mp3'
+const SFX_SRC = '/audio/intro.wav'
 const SFX_VOLUME = 0.6
 
 /* First-load splash with a click-to-enter gate. The name shows on an ink
