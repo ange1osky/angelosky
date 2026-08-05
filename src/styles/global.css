@@ -165,6 +165,144 @@ ul {
   }
 }
 
+/* First-load splash. Same bar + easing language as the route wipe, so the
+   intro reads as part of the same system. Stacked full-bleed layers cover the
+   viewport, the wordmark plays, then each layer sweeps off in turn — ink first,
+   then coral, then mint — trailing the brand colours across the reveal edge. */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  overflow: hidden;
+  /* Interactive now — it's a click-to-enter gate, so it must catch the click
+     (and block the site underneath until the visitor enters). */
+  pointer-events: auto;
+  cursor: pointer;
+  contain: strict;
+}
+
+/* Layers hold, covering the viewport, until the visitor clicks to enter. */
+.intro__layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.intro__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.3em;
+  background: var(--ink);
+}
+
+.intro__layer--coral {
+  background: var(--coral);
+}
+
+.intro__layer--mint {
+  background: var(--mint);
+}
+
+/* On enter, each layer sweeps right in turn (panel → coral → mint), same curve
+   as .wipe__bar; the staggered delays create the trailing colour edge. */
+.intro--entered .intro__panel {
+  animation: intro-exit 0.72s cubic-bezier(0.66, 0, 0.28, 1) forwards;
+}
+
+.intro--entered .intro__layer--coral {
+  animation: intro-exit 0.72s cubic-bezier(0.66, 0, 0.28, 1) 0.08s forwards;
+}
+
+.intro--entered .intro__layer--mint {
+  animation: intro-exit 0.72s cubic-bezier(0.66, 0, 0.28, 1) 0.16s forwards;
+}
+
+.intro__word {
+  font-family: var(--font); /* Poppins */
+  font-weight: 600;
+  font-size: clamp(2.4rem, 3vw, 5rem);
+  letter-spacing: -0.1em;
+  text-transform: lowercase;
+
+  /* inline-block + padding + roomier line-height stop -webkit-background-clip:
+     text from cropping the heavy glyph edges and descenders. The negative
+     letter-spacing tightened the text box enough to clip 'g'/'y' and the last
+     letter, so give it breathing room (extra on the bottom for descenders). */
+  display: inline-block;
+  padding: 0.1em 0.18em 0.24em;
+  line-height: 1.1;
+
+  background-image: linear-gradient(
+    90deg,
+    var(--coral) 0%,
+    var(--coral) 30%,
+    var(--mint) 50%,
+    var(--coral) 70%,
+    var(--coral) 100%
+  );
+  background-size: 300% 100%;
+  background-position: 0% 0;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+
+  animation:
+    intro-word-in 0.8s var(--ease) both,
+    intro-word-wipe 1.5s var(--ease) 0.15s both;
+}
+
+@keyframes intro-word-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Slides the wide gradient so the mint band travels through the letters. */
+@keyframes intro-word-wipe {
+  from {
+    background-position: 0% 0;
+  }
+  to {
+    background-position: 100% 0;
+  }
+}
+
+/* "click to enter" prompt under the name — softly pulsing to invite the click. */
+.intro__hint {
+  font-family: var(--font);
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  animation: intro-hint 1.7s ease-in-out 0.5s infinite both;
+}
+
+@keyframes intro-hint {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes intro-exit {
+  to {
+    transform: translateX(100%);
+  }
+}
+
 /* Videos/Programs switch. Same directional read as the page wipe, but built
    from transform + opacity so it never triggers a repaint of the card grid. */
 @keyframes tab-wipe {
@@ -1490,7 +1628,7 @@ ul {
 .modal__entry-meta {
   margin-top: 3px;
   font-size: clamp(0.8rem, 1.15vw, 0.88rem);
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.45;
   color: #6b6b6b;
 }
