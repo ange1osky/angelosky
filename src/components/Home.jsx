@@ -73,7 +73,7 @@ export default function Home() {
         <div className="about__portrait">
           <img
             className="about__photo"
-            src="/images/aboutpic.webp"
+            src="/images/aboutpic.png"
             alt="Angelo C. Balane"
           />
         </div>

@@ -30,7 +30,7 @@ export const HERO = {
   title: 'PORTFOLIO',
   page: 'PAGE 01',
   tagline: [
-    { text: 'vision', tone: 'coral' },
+    { text: 'vision',  tone: 'coral' },
     { text: 'to', tone: 'plain' },
     { text: 'creation.', tone: 'mint' },
   ],
@@ -59,15 +59,11 @@ export const PANELS = {
         ],
       },
       {
-        title: 'CERTIFICATIONS & SCHOLARSHIPS',
+        title: 'CERTIFICATIONS',
         items: [
           {
             title: 'TESDA National Certificate II in Computer Systems Servicing',
             meta: 'NC II Holder',
-          },
-          {
-            title: 'Department of Science and Technology - Science Education Institute',
-            meta: 'Scholar',
           },
         ],
       },
