@@ -6,11 +6,7 @@ import { useState } from 'react'
 const SFX_SRC = '/audio/intro.wav'
 const SFX_VOLUME = 0.6
 
-/* First-load splash with a click-to-enter gate. The name shows on an ink
-   screen; clicking anywhere plays the sound (the click is the user gesture that
-   satisfies autoplay policy, so it plays reliably) and sweeps the colour layers
-   off to reveal the site. Mounted once per session by App; unmounts itself via
-   onDone when the last layer clears. */
+
 export default function Intro({ onDone }) {
   const [entered, setEntered] = useState(false)
 

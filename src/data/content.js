@@ -12,12 +12,6 @@ export const SECTIONS = [
   { id: 'contacts', label: 'Contacts' },
 ]
 
-/* Background track behind the whole site, toggled from the nav.
- * `src`    — the audio file in `public/audio/`. Leave '' and the nav toggle
- *            disappears entirely, so the site is fine without one.
- * `artist` — shown in bold beside the switch, and read out to screen readers.
- * `track`  — shown lighter after it. Both hide on narrow screens.
- * `volume` — 0 to 1, NOT 0 to 100. Anything above 1 is clamped to full. */
 export const MUSIC = {
   src: '/audio/music.mp3',
   volume: 0.45,
@@ -50,7 +44,7 @@ export const PANELS = {
         items: [
           {
             title: 'BS Computer Science: Cebu Institute of Technology - University',
-            meta: '2026',
+            meta: '2026-Present',
           },
           {
             title: 'Information Communication Technology: Tagbilaran City Science High School',
@@ -73,7 +67,7 @@ export const PANELS = {
     heading: 'Experience',
     groups: [
       {
-        title: 'CREATIVE',
+        title: 'CREATIVE ROLES',
         items: [
           { title: 'Oculus Multimedia Club 25-26', meta: 'Producer / Editor / Videographer' },
           { title: 'TCSHS Supreme Student Learning Government 24-26', meta: 'Layout Artist' },
@@ -90,6 +84,7 @@ export const PANELS = {
  * `poster` — the thumbnail in `public/images/thumbs/`, shown before playback
  *            and again as the <video> poster while the first frame decodes. */
 export const VIDEOS = [
+  { id: 'v0', title: 'CIT-U: Brand New Day', award: '', roles: 'Personal Project', src: '/videos/0.mp4', poster: '/images/thumbs/0.png' },
   { id: 'v1', title: 'DON MACCHIATOS: Creator Challenge 2026', award: '2nd Runner Up', roles: 'Director // Videographer // Editor', src: '/videos/1.mp4', poster: '/images/thumbs/1.png' },
   { id: 'v2', title: 'TCSHS Tambuli DLC Edit', award: '', roles: 'Videographer // Editor', src: '/videos/2.mp4', poster: '/images/thumbs/2.png' },
   { id: 'v3', title: 'RSTF 2025: Siyensikula', award: '2nd Place', roles: 'Editor', src: '/videos/3.mp4', poster: '/images/thumbs/3.png' },
@@ -119,7 +114,7 @@ export const PROGRAMS = [
   {
     id: 'p1',
     title: 'GMTK Game Jam 2026: Goblin Alarm',
-    category: 'Game Development',
+    category: 'Game Dev',
     award: 'Top 38% out of 10,000+ entries - Top 19% in Art Category',
     roles: 'Artist',
     href: 'https://boys-at-the-back.itch.io/goblin-alarm',
@@ -131,7 +126,7 @@ export const PROGRAMS = [
  * any project uses them — that's how a category appears while its first
  * project is still in progress. Anything used by a program but missing here is
  * appended automatically, so a new `category` can never go unlisted. */
-const DECLARED_CATEGORIES = ['Game Development', 'Web Development']
+const DECLARED_CATEGORIES = ['Game Dev', 'Web Dev']
 
 export const PROGRAM_CATEGORIES = [
   ...new Set([

@@ -52,7 +52,7 @@ export default function Home() {
             I am <strong>Angelo C. Balane</strong>, an 18 year old student from the
             Philippines currently pursuing a degree in Bachelor of Science in Computer
             Science. This website showcases my <span className="hl-teal">development</span>{' '}
-            capabilities as I hone my skills as a programmer.
+            capabilities as I hone my skills in programming.
           </p>
 
           <p className="about__body">
