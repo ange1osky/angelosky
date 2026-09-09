@@ -25,7 +25,7 @@ export default function Navbar({ route }) {
             {BRAND}
           </a>
         </div>
-
+        
         <ul className="nav__links">
           {SECTIONS.map((section) => (
             <li key={section.id}>
