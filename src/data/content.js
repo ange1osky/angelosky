@@ -127,7 +127,7 @@ export const PROGRAMS = [
  * any project uses them — that's how a category appears while its first
  * project is still in progress. Anything used by a program but missing here is
  * appended automatically, so a new `category` can never go unlisted. */
-const DECLARED_CATEGORIES = ['Game Dev', 'Web Dev']
+const DECLARED_CATEGORIES = ['Game Dev']
 
 export const PROGRAM_CATEGORIES = [
   ...new Set([
@@ -153,13 +153,11 @@ export const PROJECT_BACKDROPS = {
  * Programs shows its categories there instead, see PROGRAM_CATEGORIES above.
  * Drop logo files in `public/tools/` and point `icon` at them. A tool with no
  * icon falls back to a lettered tile. */
-export const TOOLS_LABEL = 'TOOLS USED:'
+export const TOOLS_LABEL = 'TOOL USED:'
 
 export const TOOLS = {
   videos: [
     { id: 'davinci', name: 'DaVinci Resolve', icon: '/tools/davinci-resolve.webp' },
-    { id: 'capcut', name: 'CapCut', icon: '/tools/capcut.png' },
-    { id: 'ibispaint', name: 'ibisPaint X', icon: '/tools/ibispaint.webp' },
   ],
 }
 
