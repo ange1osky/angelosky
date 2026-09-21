@@ -1,15 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
 import { PlayIcon } from './Icons.jsx'
+import CornerMarks from './CornerMarks.jsx'
+import Crosshair from './Crosshair.jsx'
 import { claimAudio, releaseAudio } from '../hooks/useAudioFocus.js'
+import { useAudioBoost } from '../hooks/useAudioBoost.js'
+import { VIDEO_BOOST } from '../data/content.js'
 
-/* Thumbnail until it is pressed; then the <video> mounts and plays. The title
-   overlay stays pinned bottom-left throughout, lifting clear of the native
-   controls during playback. */
+/* Thumbnail until it is pressed; then the <video> mounts and plays in place.
+   The title and roles sit under the frame, so nothing covers the footage. */
 export default function VideoCard({ item, activeId, onActivate }) {
   const [playing, setPlaying] = useState(false)
   const [paused, setPaused] = useState(false)
   const [failed, setFailed] = useState(false)
   const videoRef = useRef(null)
+  const live = playing && !paused
+
+  // Push clip audio past the element's 100% ceiling toward desktop loudness.
+  useAudioBoost(videoRef, VIDEO_BOOST, playing)
 
   const start = () => {
     // Claim the single-play slot in the same batch as `playing`, so the effect
@@ -57,79 +64,88 @@ export default function VideoCard({ item, activeId, onActivate }) {
 
   return (
     <figure className="card card--video">
-      {/* `playing` = the player is mounted; `live` = it is actually rolling.
-          The title hides on the second, but stays clear of the control bar on
-          the first, so a paused video still shows what it is. */}
-      <div className="card__frame" data-playing={playing} data-live={playing && !paused}>
-        {playing ? (
-          <video
-            ref={videoRef}
-            className="card__video"
-            src={item.src}
-            poster={item.poster || undefined}
-            controls
-            playsInline
-            preload="metadata"
-            /* Drops Download and Picture-in-Picture from the player's ⋮ menu,
-               and blocks right-click → Save video as. Casual saving only —
-               the file URL is still reachable from devtools. */
-            controlsList="nodownload noplaybackrate"
-            disablePictureInPicture
-            onContextMenu={(e) => e.preventDefault()}
-            /* Fires for the native control too, not just our play button.
-               Claiming here rather than in `start` covers every route into
-               playback — our button, the native controls, and the scroll-away
-               observer that pauses it again. */
-            onPlay={() => {
-              setPaused(false)
-              onActivate?.(item.id)
-              claimAudio(item.id)
-            }}
-            onPause={() => {
-              setPaused(true)
-              releaseAudio(item.id)
-            }}
-            onEnded={() => releaseAudio(item.id)}
-            onError={() => {
-              setFailed(true)
-              releaseAudio(item.id)
-            }}
-          />
-        ) : (
-          <>
-            {item.poster ? (
-              <img className="card__thumb" src={item.poster} alt="" loading="lazy" />
-            ) : (
-              <span className="ph" aria-hidden="true">
-                Video placeholder
-              </span>
-            )}
-            <button
-              type="button"
-              className="card__play"
-              onClick={start}
-              aria-label={`Play ${item.title}`}
-            >
-              <PlayIcon />
-            </button>
-          </>
-        )}
+      <div className="card__box frame">
+        <CornerMarks />
 
-        {failed && (
-          <span className="card__fallback">
-            <strong>No video file yet</strong>
-            <span>
-              Drop the file at <code>public{item.src}</code> — or point <code>src</code> in{' '}
-              <code>src/data/content.js</code> somewhere else.
+        {/* `playing` = the player is mounted; `live` = it is actually rolling.
+            The award tag and crosshair step aside for both, clearing the
+            footage and the native controls. */}
+        <div className="card__frame" data-playing={playing} data-live={live}>
+          <Crosshair />
+          {playing ? (
+            <video
+              ref={videoRef}
+              className="card__video"
+              src={item.src}
+              poster={item.poster || undefined}
+              controls
+              playsInline
+              preload="metadata"
+              /* Drops Download and Picture-in-Picture from the player's ⋮ menu,
+                 and blocks right-click → Save video as. Casual saving only —
+                 the file URL is still reachable from devtools. */
+              controlsList="nodownload noplaybackrate"
+              disablePictureInPicture
+              onContextMenu={(e) => e.preventDefault()}
+              /* Fires for the native control too, not just our play button.
+                 Claiming here rather than in `start` covers every route into
+                 playback — our button, the native controls, and the scroll-away
+                 observer that pauses it again. */
+              onPlay={() => {
+                setPaused(false)
+                onActivate?.(item.id)
+                claimAudio(item.id)
+              }}
+              onPause={() => {
+                setPaused(true)
+                releaseAudio(item.id)
+              }}
+              onEnded={() => releaseAudio(item.id)}
+              onError={() => {
+                setFailed(true)
+                releaseAudio(item.id)
+              }}
+            />
+          ) : (
+            <>
+              {item.poster ? (
+                <img className="card__thumb" src={item.poster} alt="" loading="lazy" />
+              ) : (
+                <span className="ph" aria-hidden="true">
+                  Video placeholder
+                </span>
+              )}
+              <button
+                type="button"
+                className="card__play"
+                onClick={start}
+                aria-label={`Play ${item.title}`}
+              >
+                <PlayIcon />
+              </button>
+            </>
+          )}
+
+          {item.award && (
+            <span className="card__tag" data-tone="award">
+              {item.award}
             </span>
-          </span>
-        )}
+          )}
 
-        <span className="card__overlay">{item.title}</span>
+          {failed && (
+            <span className="card__fallback">
+              <strong>No video file yet</strong>
+              <span>
+                Drop the file at <code>public{item.src}</code> — or point <code>src</code> in{' '}
+                <code>src/data/content.js</code> somewhere else.
+              </span>
+            </span>
+          )}
+        </div>
       </div>
 
       <figcaption className="card__meta">
-        {item.award && <span className="card__award">{item.award}</span>}
+        <span className="card__title">{item.title}</span>
         <span className="card__roles">{item.roles}</span>
       </figcaption>
     </figure>

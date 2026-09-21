@@ -1,7 +1,7 @@
-/* Row of category filters under the tabs on the Programs tab, sitting in the
-   same slot the tool logos occupy on Videos. The list is derived from the
-   programs themselves, so adding a category is a content edit, not a code one. */
-export default function ProgramCategories({ categories, active, onSelect }) {
+/* Category filters for the Programs tab, sitting in the rail slot the tool
+   logos occupy on Videos. The list is derived from the programs themselves, so
+   adding a category is a content edit, not a code one. */
+export default function ProgramCategories({ categories, programs, active, onSelect, format }) {
   if (!categories?.length) return null
 
   return (
@@ -19,7 +19,7 @@ export default function ProgramCategories({ categories, active, onSelect }) {
               aria-pressed={name === active}
               onClick={() => onSelect(name)}
             >
-              {name}
+              {name} {format(programs.filter((p) => p.category === name).length)}
             </button>
           </li>
         ))}

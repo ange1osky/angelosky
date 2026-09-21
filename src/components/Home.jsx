@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import FooterBar from './FooterBar.jsx'
 import Modal from './Modal.jsx'
+import CornerMarks, { LineMarks } from './CornerMarks.jsx'
+import Crosshair from './Crosshair.jsx'
 import { HERO, PANELS } from '../data/content.js'
 
 export default function Home() {
@@ -20,9 +22,9 @@ export default function Home() {
 
         <div className="shell hero__inner">
           <div>
+            <span className="page-chip hero__chip">{HERO.page}</span>
             <p className="hero__kicker">{HERO.kicker}</p>
             <h1 className="display hero__title">{HERO.title}</h1>
-            <span className="page-chip hero__chip">{HERO.page}</span>
           </div>
 
           <p className="hero__tagline">
@@ -45,8 +47,10 @@ export default function Home() {
       </div>
 
       <div className="about">
+        <LineMarks edge="top" split />
+
         <div className="about__copy">
-          <h2 className="about__title">ABOUT ME</h2>
+          <h2 className="display about__title">ABOUT ME</h2>
 
           <p className="about__body">
             I am <strong>Angelo C. Balane</strong>, an 18 year old student from the
@@ -61,16 +65,22 @@ export default function Home() {
           </p>
 
           <div className="about__actions">
-            <button className="pill" onClick={() => setOpenPanel('education')}>
+            <button className="pill" data-tone="mint" onClick={() => setOpenPanel('education')}>
+              <CornerMarks />
               Education
             </button>
-            <button className="pill" onClick={() => setOpenPanel('experience')}>
+            <button className="pill" data-tone="coral" onClick={() => setOpenPanel('experience')}>
+              <CornerMarks />
               Experience
             </button>
           </div>
         </div>
 
         <div className="about__portrait">
+          <Crosshair />
+          <span className="about__frame" aria-hidden="true">
+            <CornerMarks />
+          </span>
           <img
             className="about__photo"
             src="/images/aboutpic.png"

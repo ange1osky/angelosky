@@ -1,4 +1,5 @@
 import FooterBar from './FooterBar.jsx'
+import CornerMarks from './CornerMarks.jsx'
 import { ICONS } from './Icons.jsx'
 import { CONTACT, INQUIRIES, SOCIALS } from '../data/content.js'
 
@@ -20,6 +21,22 @@ function LinkRow({ item }) {
   )
 }
 
+/* A label over a hairline-framed list of links, marked at the corners like
+   the project cards. */
+function LinkBlock({ label, items, wide = false }) {
+  return (
+    <div className="talk__block">
+      <p className="talk__label">{label}</p>
+      <div className={`talk__list frame${wide ? ' talk__list--socials' : ''}`}>
+        <CornerMarks />
+        {items.map((item) => (
+          <LinkRow key={item.id} item={item} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function Contact() {
   return (
     <section className="section" id="contacts" aria-label="Contacts">
@@ -28,29 +45,14 @@ export default function Contact() {
         <div className="talk__scrim" aria-hidden="true" />
 
         <div className="shell talk__inner">
+          <span className="page-chip talk__chip">{CONTACT.page}</span>
           <h2 className="display talk__title">
             {CONTACT.title}{' '}
             <span className="talk__title-accent">{CONTACT.titleAccent}</span>
           </h2>
-          <span className="page-chip talk__chip">{CONTACT.page}</span>
 
-          <div className="talk__block">
-            <p className="talk__label">{CONTACT.inquiriesLabel}</p>
-            <div className="talk__list">
-              {INQUIRIES.map((item) => (
-                <LinkRow key={item.id} item={item} />
-              ))}
-            </div>
-          </div>
-
-          <div className="talk__block">
-            <p className="talk__label">{CONTACT.followLabel}</p>
-            <div className="talk__list talk__list--socials">
-              {SOCIALS.map((social) => (
-                <LinkRow key={social.id} item={social} />
-              ))}
-            </div>
-          </div>
+          <LinkBlock label={CONTACT.inquiriesLabel} items={INQUIRIES} />
+          <LinkBlock label={CONTACT.followLabel} items={SOCIALS} wide />
         </div>
 
         <div className="talk__shapes" aria-hidden="true">

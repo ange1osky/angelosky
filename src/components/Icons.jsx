@@ -86,6 +86,24 @@ export function PlayIcon(props) {
   )
 }
 
+/* Registration mark for the intro frame and the card corners. Drawn as one
+   filled path so it stays crisp at 9–10px, where two stroked lines blur. */
+export function PlusIcon(props) {
+  return (
+    <svg viewBox="0 0 9 9" aria-hidden="true" {...props}>
+      <path d="M4 0h1v4h4v1H5v4H4V5H0V4h4Z" fill="currentColor" />
+    </svg>
+  )
+}
+
+export function ArrowUpRightIcon(props) {
+  return (
+    <svg viewBox="0 0 10 10" aria-hidden="true" {...props}>
+      <path d="M2 8 8 2M3.2 2H8v4.8" fill="none" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  )
+}
+
 /* Keyed by the `id` used in content.js, so adding a contact or social row is
    just a data edit plus an entry here. */
 export const ICONS = {

@@ -5,6 +5,7 @@
 
 export const BRAND = 'angelosky'
 export const COPYRIGHT = '© 2026 | angelosky'
+export const VERSION = 'version 3.0' // right end of the footer bar
 
 export const SECTIONS = [
   { id: 'home', label: 'Home' },
@@ -14,8 +15,15 @@ export const SECTIONS = [
 
 export const MUSIC = {
   src: '/audio/music.mp3',
-  volume: 0.45,
+  volume: 0.85,   // base level, 0–1, before the boost below
+  boost: 1.5,     // Web Audio gain (>1) so the bed can exceed the 100% cap
 }
+
+/* Clips are authored at wildly different levels, and the browser caps a plain
+   <video> at 100%. This Web Audio gain (>1) lifts the quiet ones toward the
+   loudness they'd have in a desktop player; a limiter in useAudioBoost tames
+   the peaks so it stays clean. */
+export const VIDEO_BOOST = 1.8
 
 /* --- Home ---------------------------------------------------------------- */
 
@@ -43,11 +51,11 @@ export const PANELS = {
         title: '',
         items: [
           {
-            title: 'BS Computer Science: Cebu Institute of Technology - University',
+            title: 'BSCS: Cebu Institute of Technology - University',
             meta: '2026-Present',
           },
           {
-            title: 'Information Communication Technology: Tagbilaran City Science High School',
+            title: 'TVL ICT: Tagbilaran City Science High School',
             meta: '2020-2026',
           },
         ],
@@ -69,8 +77,9 @@ export const PANELS = {
       {
         title: 'CREATIVE ROLES',
         items: [
-          { title: 'Oculus Multimedia Club 25-26', meta: 'Producer / Editor / Videographer' },
-          { title: 'TCSHS Supreme Student Learning Government 24-26', meta: 'Layout Artist' },
+          { title: "CIT-U Computer Students' Society 26-Present", meta: 'Videographer | Editor' },
+          { title: 'TCSHS Oculus Multimedia Club 25-26', meta: 'Videographer | Editor' },
+          { title: 'TCSHS Supreme Student Learning Government: 24-26', meta: 'Layout Artist' },
         ],
       },
     ],
@@ -79,32 +88,40 @@ export const PANELS = {
 
 /* --- Projects ------------------------------------------------------------ */
 
+/* The pinned column on the left of the projects page. `badge` is the tag above
+ * the title; `blurb` sits at the foot of the column — set it to '' to drop it. */
+export const PROJECTS_HEAD = {
+  badge: 'PAGE 02',
+  title: 'PROJECTS',
+  blurb: "Everything I've shot, cut and colaborated on, all in one page.",
+}
+
 /* 19 video slots — one line each so they're quick to edit.
  * `src`    — the .mp4 in `public/videos/`.
  * `poster` — the thumbnail in `public/images/thumbs/`, shown before playback
  *            and again as the <video> poster while the first frame decodes. */
 export const VIDEOS = [
+  { id: 'v21', title: 'CIT-U: CCS Acquaintance Party 2026', award: '', roles: 'Videographer | Editor', src: '/videos/21.mp4', poster: '/images/thumbs/21.png' },
   { id: 'v20', title: 'Cebu Oceanpark', award: '', roles: 'Personal Project', src: '/videos/20.mp4', poster: '/images/thumbs/20.png' },
   { id: 'v19', title: 'CIT-U: Brand New Day', award: '', roles: 'Personal Project', src: '/videos/19.mp4', poster: '/images/thumbs/19.png' },
-  { id: 'v18', title: 'DON MACCHIATOS: Creator Challenge 2026', award: '2nd Runner Up', roles: 'Director // Videographer // Editor', src: '/videos/18.mp4', poster: '/images/thumbs/18.png' },
-  { id: 'v17', title: 'TCSHS Tambuli DLC Edit', award: '', roles: 'Videographer // Editor', src: '/videos/17.mp4', poster: '/images/thumbs/17.png' },
+  { id: 'v18', title: 'DON MACCHIATOS: Creator Challenge 2026', award: '2nd Runner Up', roles: 'Director | Videographer | Editor', src: '/videos/18.mp4', poster: '/images/thumbs/18.png' },
+  { id: 'v17', title: 'TCSHS Tambuli DLC Edit', award: '', roles: 'Videographer | Editor', src: '/videos/17.mp4', poster: '/images/thumbs/17.png' },
   { id: 'v16', title: 'RSTF 2025: Siyensikula', award: '2nd Place', roles: 'Editor', src: '/videos/16.mp4', poster: '/images/thumbs/16.png' },
-  { id: 'v15', title: 'RSTF 2025: Hype Video', award: '', roles: 'Videographer // Editor', src: '/videos/15.mp4', poster: '/images/thumbs/15.png' },
+  { id: 'v15', title: 'RSTF 2025: Hype Video', award: '', roles: 'Videographer | Editor', src: '/videos/15.mp4', poster: '/images/thumbs/15.png' },
   { id: 'v14', title: 'RSPC 2026: Advocacy Video', award: '', roles: 'Editor', src: '/videos/14.mp4', poster: '/images/thumbs/14.png' },
-  { id: 'v13', title: 'TCSHS Tambuli DLC: Hype Video', award: '', roles: 'Videographer // Editor', src: '/videos/13.mp4', poster: '/images/thumbs/13.png' },
-  { id: 'v12', title: 'TCSHS Balik Scihi', award: '', roles: 'Videographer // Editor', src: '/videos/12.mp4', poster: '/images/thumbs/12.png' },
+  { id: 'v13', title: 'TCSHS: Tambuli DLC Hype Video', award: '', roles: 'Videographer | Editor', src: '/videos/13.mp4', poster: '/images/thumbs/13.png' },
+  { id: 'v12', title: 'TCSHS: Balik Scihi', award: '', roles: 'Videographer | Editor', src: '/videos/12.mp4', poster: '/images/thumbs/12.png' },
   { id: 'v11', title: 'January Highlights', award: '', roles: 'Personal Project', src: '/videos/11.mp4', poster: '/images/thumbs/11.png' },
   { id: 'v10', title: 'Mclaren 765LT', award: '', roles: 'Personal Project', src: '/videos/10.mp4', poster: '/images/thumbs/10.png' },
-  { id: 'v9', title: 'TCSHS Intramurals 2025', award: '', roles: 'Videographer // Editor', src: '/videos/9.mp4', poster: '/images/thumbs/9.png' },
-  { id: 'v8', title: 'TCSHS MathSci Month 2025', award: '', roles: 'Videographer // Editor', src: '/videos/8.mp4', poster: '/images/thumbs/8.png' },
-  { id: 'v7', title: 'TCSHS United Nations 2025', award: '', roles: 'Videographer // Editor', src: '/videos/7.mp4', poster: '/images/thumbs/7.png' },
+  { id: 'v9', title: 'TCSHS: Intramurals 2025', award: '', roles: 'Videographer | Editor', src: '/videos/9.mp4', poster: '/images/thumbs/9.png' },
+  { id: 'v8', title: 'TCSHS: MathSci Month 2025', award: '', roles: 'Videographer | Editor', src: '/videos/8.mp4', poster: '/images/thumbs/8.png' },
+  { id: 'v7', title: 'TCSHS: United Nations 2025', award: '', roles: 'Videographer | Editor', src: '/videos/7.mp4', poster: '/images/thumbs/7.png' },
   { id: 'v6', title: 'Back and Port', award: '', roles: 'Personal Project', src: '/videos/6.mp4', poster: '/images/thumbs/6.png' },
   { id: 'v5', title: 'Art of Cinematography', award: '', roles: 'Personal Project', src: '/videos/5.mp4', poster: '/images/thumbs/5.png' },
-  { id: 'v4', title: 'BFP Short Film Contest: Ang Huling Babala', award: '1st Place', roles: 'Editor', src: '/videos/4.mp4', poster: '/images/thumbs/4.png' },
-  { id: 'v3', title: 'TCSHS Acquaintance Party 2025', award: '', roles: 'Personal Project', src: '/videos/3.mp4', poster: '/images/thumbs/3.png' },
-  { id: 'v2', title: 'Trend Edit', award: '', roles: 'Personal Project', src: '/videos/2.mp4', poster: '/images/thumbs/2.png' },
+  { id: 'v4', title: 'BFP: Ang Huling Babala', award: '1st Place', roles: 'Editor', src: '/videos/4.mp4', poster: '/images/thumbs/4.png' },
+  { id: 'v3', title: 'TCSHS: Acquaintance Party 2025', award: '', roles: 'Personal Project', src: '/videos/3.mp4', poster: '/images/thumbs/3.png' },
   { id: 'v1', title: 'Motion', award: '', roles: 'Personal Project', src: '/videos/1.mp4', poster: '/images/thumbs/1.png' },
-  { id: 'v0', title: 'Graduation Music Video: Before We Go', award: '', roles: 'Director // Videographer // Editor', src: '/videos/0.mp4', poster: '/images/thumbs/0.png' },
+  { id: 'v0', title: 'Graduation MV: Before We Go', award: '', roles: 'Director | Videographer | Editor', src: '/videos/0.mp4', poster: '/images/thumbs/0.png' },
 ]
 
 /* Each card is a link — swap `href` for the real destination.
@@ -140,14 +157,6 @@ export const TABS = [
   { id: 'videos', label: 'Videos' },
   { id: 'programs', label: 'Programs' },
 ]
-
-/* Background image behind each tab of the projects page. Leave '' to show the
- * placeholder box; point at a file in `public/images/` to use a real one.
- * Set both to the same path if you want one background across both tabs. */
-export const PROJECT_BACKDROPS = {
-  videos: '/images/videosbg.jpg',
-  programs: '/images/programbg.jpg',
-}
 
 /* Shown under the tabs, keyed by tab id. Only the Videos tab lists tools —
  * Programs shows its categories there instead, see PROGRAM_CATEGORIES above.

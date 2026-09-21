@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { MUSIC } from '../data/content.js'
 import { HeadphonesIcon } from './Icons.jsx'
 import { useAudioTaken } from '../hooks/useAudioFocus.js'
+import { useMusicEnabled, setMusicEnabled } from '../hooks/useMusicPref.js'
+import { useAudioBoost } from '../hooks/useAudioBoost.js'
 
-/* Remembered across reloads, but see the resume effect — a stored 'on' is a
+/* Remembered across reloads, but see the play effect — a stored 'on' is a
    request to play, not a guarantee the browser will allow it. */
-const STORAGE_KEY = 'angelosky:music'
 const FADE_MS = 420
 
 /* `volume` is hand-edited in content.js and 0–1 reads like a percentage to
@@ -40,16 +41,19 @@ function fadeTo(el, target, onDone) {
 export default function MusicToggle() {
   /* `enabled` is what the visitor asked for; whether sound is actually coming
      out is derived below. Keeping the two apart is what lets a video borrow the
-     speakers and hand them back without the button lying about its state. */
-  const [enabled, setEnabled] = useState(
-    () => typeof localStorage !== 'undefined' && localStorage.getItem(STORAGE_KEY) === 'on'
-  )
+     speakers and hand them back without the button lying about its state. It
+     lives in a shared store so the enter gate can switch it on too. */
+  const enabled = useMusicEnabled()
   const [broken, setBroken] = useState(false)
   const audioRef = useRef(null)
   const cancelFade = useRef(null)
 
   const videoTaken = useAudioTaken()
   const shouldPlay = enabled && !videoTaken && !broken
+
+  // Lets the bed climb past the element's 100% cap. Multiplies the fade below,
+  // so the ramp still runs smoothly to TARGET_VOLUME × boost.
+  useAudioBoost(audioRef, Number(MUSIC.boost) || 1)
 
   /* The single place playback is driven. Everything else just moves `enabled`
      or claims audio focus, and this effect reconciles the element to match. */
@@ -67,8 +71,9 @@ export default function MusicToggle() {
         () => {
           // Autoplay policy refused us — there has been no gesture yet. Drop
           // `enabled` so the button shows off rather than claiming to play
-          // something silent; one press then starts it for real.
-          setEnabled(false)
+          // something silent; one press then starts it for real. Don't persist
+          // it — the visitor never asked for off, the browser just stalled.
+          setMusicEnabled(false, { persist: false })
         }
       )
     } else if (!el.paused) {
@@ -81,10 +86,8 @@ export default function MusicToggle() {
   if (!MUSIC.src || broken) return null
 
   const toggle = () => {
-    const next = !enabled
-    // Written on the gesture, so the choice survives a video interrupting it.
-    localStorage.setItem(STORAGE_KEY, next ? 'on' : 'off')
-    setEnabled(next)
+    // Persisted on the gesture, so the choice survives a video interrupting it.
+    setMusicEnabled(!enabled)
   }
 
   const name = [MUSIC.artist, MUSIC.track].filter(Boolean).join(' — ') || 'Music'

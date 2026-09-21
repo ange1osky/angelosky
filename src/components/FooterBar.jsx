@@ -1,11 +1,17 @@
-import { COPYRIGHT } from '../data/content.js'
+import { COPYRIGHT, VERSION } from '../data/content.js'
+import { LineMarks } from './CornerMarks.jsx'
 
-/* Each section closes with its own bar — dark on the home page, cream on the
-   projects and contact pages, as in the mockup. */
+/* Each page closes with its own bar — dark on the home page, cream on the
+   contact page — pinned to the bottom of the screen as you scroll, the way
+   the nav is pinned to the top. */
 export default function FooterBar({ tone = 'dark' }) {
   return (
     <div className={`footer-bar footer-bar--${tone}`}>
-      <div className="shell">{COPYRIGHT}</div>
+      <LineMarks edge="top" />
+      <div className="shell footer-bar__inner">
+        <span>{COPYRIGHT}</span>
+        <span className="footer-bar__version">{VERSION}</span>
+      </div>
     </div>
   )
 }

@@ -23,10 +23,16 @@ export default function App() {
     () => sessionStorage.getItem('intro-seen') === '1'
   )
 
+  // One-shot flag: on the very first enter, the page pulls into focus behind
+  // the lifting overlay so it feels like arriving inside, not a cut. Cleared
+  // once it has played so route changes keep their own lighter wipe-in.
+  const [arriving, setArriving] = useState(false)
+
   return (
     <>
       {!introDone && (
         <Intro
+          onEnter={() => setArriving(true)}
           onDone={() => {
             sessionStorage.setItem('intro-seen', '1')
             setIntroDone(true)
@@ -36,7 +42,13 @@ export default function App() {
 
       <Navbar route={route} />
       {/* Keyed on the route so the page remounts and replays its wipe-in. */}
-      <main key={route}>
+      <main
+        key={route}
+        className={arriving ? 'arrive' : undefined}
+        onAnimationEnd={(e) => {
+          if (e.animationName === 'site-arrive') setArriving(false)
+        }}
+      >
         <Page />
       </main>
 

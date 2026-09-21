@@ -31,6 +31,14 @@
   --font: 'Poppins', 'Century Gothic', 'Segoe UI', system-ui, sans-serif;
   --font-heavy: 'Archivo Black', 'Arial Black', 'Poppins', sans-serif;
 
+  /* Quiet greys for labels and hairline rules. */
+  --grey: #80828c;
+  --rule: rgba(255, 255, 255, 0.08);
+
+  /* Where the two full-height page lines stand, in from each edge. Shared by
+     the lines themselves and every + mark that sits on them. */
+  --line-x: max(10px, calc(var(--gutter) - 22px));
+
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
@@ -165,134 +173,262 @@ ul {
   }
 }
 
-/* First-load splash. Same bar + easing language as the route wipe, so the
-   intro reads as part of the same system. Stacked full-bleed layers cover the
-   viewport, the wordmark plays, then each layer sweeps off in turn — ink first,
-   then coral, then mint — trailing the brand colours across the reveal edge. */
+/* First-load preloader. A mint panel with a frame of hairlines that slide in
+   from the edges, then close in on the centre as the count climbs — ending as
+   a small box round "100%", which turns into the Enter prompt. Everything
+   moves through two custom properties the component writes each frame:
+     --enter  0 → 1  lines travel in from just off-screen
+     --z      0 → 1  lines close from the edge inset to the centre box
+   The positions are in container units, so a resize mid-run stays correct. */
 .intro {
+  --intro-bg: var(--mint);
+  --intro-line: #3fbfa9;
+  --intro-ink: var(--ink);
+  --inset: 2rem;
+  /* Half the final box. Capped so it still fits a short landscape phone. */
+  --box: min(72px, 50cqw - var(--inset) - 12px, 50cqh - var(--inset) - 12px);
+  --enter: 0;
+  --z: 0;
+  /* Left line's travel; the right mirrors it. Same for top and bottom. */
+  --x: calc(
+    (var(--inset) + 2px) * (var(--enter) - 1) + (50cqw - var(--box) - var(--inset)) * var(--z)
+  );
+  --y: calc(
+    (var(--inset) + 2px) * (var(--enter) - 1) + (50cqh - var(--box) - var(--inset)) * var(--z)
+  );
+
   position: fixed;
   inset: 0;
   z-index: 300;
   overflow: hidden;
-  /* Interactive now — it's a click-to-enter gate, so it must catch the click
-     (and block the site underneath until the visitor enters). */
-  pointer-events: auto;
-  cursor: pointer;
+  container-type: size;
   contain: strict;
+  background: var(--intro-bg);
+  color: var(--intro-ink);
+  cursor: progress;
+  outline: none;
 }
 
-/* Layers hold, covering the viewport, until the visitor clicks to enter. */
-.intro__layer {
+.intro[data-ready='true'] {
+  cursor: pointer;
+}
+
+.intro__chrome {
   position: absolute;
   inset: 0;
+}
+
+.intro__line {
+  position: absolute;
+  background: var(--intro-line);
   will-change: transform;
 }
 
-.intro__panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.3em;
-  background: var(--ink);
+.intro__line--left,
+.intro__line--right {
+  top: 0;
+  bottom: 0;
+  width: 1px;
 }
 
-.intro__layer--coral {
-  background: var(--coral);
+.intro__line--top,
+.intro__line--bottom {
+  left: 0;
+  right: 0;
+  height: 1px;
 }
 
-.intro__layer--mint {
-  background: var(--mint);
+.intro__line--left {
+  left: var(--inset);
+  transform: translate3d(var(--x), 0, 0);
 }
 
-/* On enter, each layer sweeps right in turn (panel → coral → mint), same curve
-   as .wipe__bar; the staggered delays create the trailing colour edge. */
-.intro--entered .intro__panel {
-  animation: intro-exit 0.72s cubic-bezier(0.66, 0, 0.28, 1) forwards;
+.intro__line--right {
+  right: var(--inset);
+  transform: translate3d(calc(var(--x) * -1), 0, 0);
 }
 
-.intro--entered .intro__layer--coral {
-  animation: intro-exit 0.72s cubic-bezier(0.66, 0, 0.28, 1) 0.08s forwards;
+.intro__line--top {
+  top: var(--inset);
+  transform: translate3d(0, var(--y), 0);
 }
 
-.intro--entered .intro__layer--mint {
-  animation: intro-exit 0.72s cubic-bezier(0.66, 0, 0.28, 1) 0.16s forwards;
+.intro__line--bottom {
+  bottom: var(--inset);
+  transform: translate3d(0, calc(var(--y) * -1), 0);
 }
 
-.intro__word {
-  font-family: var(--font); /* Poppins */
+/* 9px marks centred on each line crossing, riding both lines that meet there. */
+.intro__plus {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  color: var(--intro-ink);
+  will-change: transform;
+}
+
+.intro__plus--tl {
+  top: calc(var(--inset) - 4px);
+  left: calc(var(--inset) - 4px);
+  transform: translate3d(var(--x), var(--y), 0);
+}
+
+.intro__plus--tr {
+  top: calc(var(--inset) - 4px);
+  right: calc(var(--inset) - 4px);
+  transform: translate3d(calc(var(--x) * -1), var(--y), 0);
+}
+
+.intro__plus--bl {
+  bottom: calc(var(--inset) - 4px);
+  left: calc(var(--inset) - 4px);
+  transform: translate3d(var(--x), calc(var(--y) * -1), 0);
+}
+
+.intro__plus--br {
+  bottom: calc(var(--inset) - 4px);
+  right: calc(var(--inset) - 4px);
+  transform: translate3d(calc(var(--x) * -1), calc(var(--y) * -1), 0);
+}
+
+/* Notched tabs hanging off the middle of each screen edge. Drawn once pointing
+   down from the top edge, then rotated into place for the other three. */
+.intro__tab {
+  position: absolute;
+  width: 141px;
+  height: 21px;
+  fill: none;
+  stroke: var(--intro-line);
+  stroke-width: 1;
+  overflow: visible;
+}
+
+.intro__tab--top {
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.intro__tab--bottom {
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%) rotate(180deg);
+}
+
+/* Rotating about the centre leaves the tab 60px off its edge (half of
+   141 − 21), so pull it back by that much. */
+.intro__tab--left {
+  top: 50%;
+  left: -61px;
+  transform: translateY(-50%) rotate(-90deg);
+}
+
+.intro__tab--right {
+  top: 50%;
+  right: -61px;
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.intro__percent,
+.intro__enter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* `backwards`, not `both`: a filled end state would pin the opacity and swallow
+   the fade-out once the count hands over to Enter. */
+.intro__percent {
+  animation: fade-in 0.2s linear backwards;
+  transition: opacity 0.2s linear;
+}
+
+.intro__enter {
   font-weight: 600;
-  font-size: clamp(2.4rem, 3vw, 5rem);
-  letter-spacing: -0.1em;
-  text-transform: lowercase;
-
-  display: inline-block;
-  padding: 0.1em 0.18em 0.24em;
-  line-height: 1.1;
-
-  background-image: linear-gradient(
-    90deg,
-    var(--coral) 0%,
-    var(--coral) 100%
-  );
-  background-size: 300% 100%;
-  background-position: 0% 0;
-  background-repeat: no-repeat;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-
-  animation:
-    intro-word-in 0.8s var(--ease) both,
-    intro-word-wipe 1.5s var(--ease) 0.15s both;
+  letter-spacing: 0.16em;
+  /* Letter-spacing trails the last letter; pad the front to re-centre it. */
+  padding-left: 0.16em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
 }
 
-@keyframes intro-word-in {
+.intro[data-ready='true'] .intro__percent {
+  opacity: 0;
+}
+
+/* Holds solid a beat after "100%" hands over, then breathes to invite the
+   click. The first pulse starts from full so the swap never blinks. */
+.intro[data-ready='true'] .intro__enter {
+  animation:
+    fade-in 0.28s linear 0.18s backwards,
+    intro-pulse 1.7s ease-in-out 1s infinite;
+  opacity: 1;
+}
+
+@keyframes intro-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.intro:focus-visible .intro__enter {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+/* On enter, the canvas takes over with an identical fill and the panel goes
+   clear behind it; the canvas then breaks up to reveal the site. */
+.intro__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+
+.intro[data-state='exit'] {
+  background: transparent;
+  pointer-events: none;
+}
+
+.intro[data-state='exit'] .intro__chrome {
+  display: none;
+}
+
+.intro[data-state='exit'] .intro__canvas {
+  display: block;
+}
+
+/* The site pulling into focus behind the lifting overlay: it starts slightly
+   oversized, soft and dim, then settles sharp — arriving, not cutting in. The
+   .arrive class is dropped the moment this ends, so `main` keeps no transform
+   (which would otherwise trap any position:fixed child inside it). */
+.arrive {
+  animation: site-arrive 0.9s var(--ease) both;
+  transform-origin: 50% 40%;
+}
+
+@keyframes site-arrive {
   from {
     opacity: 0;
-    transform: translate3d(0, 26px, 0);
+    transform: scale(1.06);
+    filter: blur(9px);
   }
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-/* Slides the wide gradient so the mint band travels through the letters. */
-@keyframes intro-word-wipe {
-  from {
-    background-position: 0% 0;
-  }
-  to {
-    background-position: 100% 0;
-  }
-}
-
-/* "click to enter" prompt under the name — softly pulsing to invite the click. */
-.intro__hint {
-  font-family: var(--font);
-  font-size: clamp(0.7rem, 1vw, 0.85rem);
-  font-weight: 500;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.6);
-  animation: intro-hint 1.7s ease-in-out 0.5s infinite both;
-}
-
-@keyframes intro-hint {
-  0%,
-  100% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 0.85;
-  }
-}
-
-@keyframes intro-exit {
-  to {
-    transform: translateX(100%);
+    transform: scale(1);
+    filter: blur(0);
   }
 }
 
@@ -316,16 +452,245 @@ ul {
   text-transform: uppercase;
 }
 
+/* "PAGE 0X" tag over each page title. Solid mint with the bottom-right corner
+   clipped, echoing the notched tabs on the intro frame. */
 .page-chip {
-  display: inline-block;
-  padding: 3px 52px 1px;
-  background: rgba(0, 0, 0, 0.15);
-  color: var(--coral);
-  font-size: clamp(0.62rem, 1vw, 0.78rem);
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  line-height: 1.5;
-  backdrop-filter: blur(4px);
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px 6px 11px;
+  background: var(--mint);
+  color: var(--ink);
+  font-size: clamp(0.64rem, 0.9vw, 0.74rem);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%);
+}
+
+/* Two full-height hairlines just in from the edges of every page — the rules
+   the intro frame is built from, left standing on the site. Difference
+   blending keeps one line legible on the dark bands, the cream panels and
+   the photos alike, where a fixed colour would vanish on one of them. */
+.section::before,
+.section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.14);
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+
+.section::before {
+  left: var(--line-x);
+}
+
+.section::after {
+  right: var(--line-x);
+}
+
+/* --- Registration marks -------------------------------------------------- */
+
+/* Corner marks (CornerMarks). Centred on the corners of the parent's border
+   box by default; override the offsets for a box with borders or padding. */
+.mark {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  color: var(--mark-color, rgba(255, 255, 255, 0.4));
+  pointer-events: none;
+  transition: transform 0.28s var(--ease);
+}
+
+.mark--tl {
+  top: var(--mark-y, -4px);
+  left: var(--mark-x, -4px);
+}
+
+.mark--tr {
+  top: var(--mark-y, -4px);
+  right: var(--mark-x, -4px);
+}
+
+.mark--bl {
+  bottom: var(--mark-y, -4px);
+  left: var(--mark-x, -4px);
+}
+
+.mark--br {
+  bottom: var(--mark-y, -4px);
+  right: var(--mark-x, -4px);
+}
+
+/* Marks on the page lines where they cross a band's edge (LineMarks). Blended
+   like the lines, so each half of the mark reads on its own background. */
+.line-mark {
+  position: absolute;
+  z-index: 2;
+  width: 9px;
+  height: 9px;
+  color: rgba(255, 255, 255, 0.72);
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+
+.line-mark--top {
+  top: -4px;
+}
+
+.line-mark--bottom {
+  bottom: -5px;
+}
+
+.line-mark--left {
+  left: calc(var(--line-x) - 4px);
+}
+
+.line-mark--right {
+  right: calc(var(--line-x) - 4px);
+}
+
+.line-mark--split {
+  left: calc(var(--split, 50%) - 4px);
+}
+
+/* --- Frames -------------------------------------------------------------- */
+
+/* Hairlines above and below with a + on each corner — the project cards and
+   the contact lists. On hover the marks step out from the corners and a mint
+   line draws along each hairline, top from the left and bottom from the
+   right, so the frame seems to trace itself round. */
+.frame {
+  /* Marks sit on the hairlines, which live on the border rather than the
+     padding box the offsets are measured from. */
+  --mark-y: -5px;
+
+  position: relative;
+  border-block: 1px solid var(--rule);
+}
+
+.frame::before,
+.frame::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  height: 1px;
+  background: var(--mint);
+  transform: scaleX(0);
+  transition: transform 0.55s var(--ease);
+  pointer-events: none;
+}
+
+.frame::before {
+  top: -1px;
+  transform-origin: left;
+}
+
+.frame::after {
+  bottom: -1px;
+  transform-origin: right;
+}
+
+.frame .mark {
+  transition: transform 0.35s var(--ease), color 0.35s var(--ease);
+}
+
+@media (hover: hover) {
+  .frame:hover::before,
+  .frame:hover::after,
+  .card:hover .frame::before,
+  .card:hover .frame::after {
+    transform: scaleX(1);
+  }
+
+  .frame:hover .mark,
+  .card:hover .frame .mark {
+    color: var(--mint);
+  }
+
+  .frame:hover .mark--tl,
+  .card:hover .frame .mark--tl {
+    transform: translate(-4px, -4px) rotate(90deg);
+  }
+
+  .frame:hover .mark--tr,
+  .card:hover .frame .mark--tr {
+    transform: translate(4px, -4px) rotate(90deg);
+  }
+
+  .frame:hover .mark--bl,
+  .card:hover .frame .mark--bl {
+    transform: translate(-4px, 4px) rotate(90deg);
+  }
+
+  .frame:hover .mark--br,
+  .card:hover .frame .mark--br {
+    transform: translate(4px, 4px) rotate(90deg);
+  }
+}
+
+/* --- Crosshair ----------------------------------------------------------- */
+
+/* Viewfinder lines over an image, tracking the pointer (Crosshair.jsx). The
+   short transition is the whole feel: the lines trail the pointer a touch
+   instead of sticking to it, like a camera settling on its subject. */
+.crosshair {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease);
+}
+
+.crosshair__h,
+.crosshair__v,
+.crosshair__plus {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.crosshair__h {
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate3d(0, var(--cy, 0px), 0);
+}
+
+.crosshair__v {
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate3d(var(--cx, 0px), 0, 0);
+}
+
+/* Centred on the crossing, and turning a quarter as it arrives so the mark
+   reads as alive rather than pasted on. */
+.crosshair__plus {
+  width: 13px;
+  height: 13px;
+  margin: -6px 0 0 -6px;
+  color: var(--mint);
+  transform: translate3d(var(--cx, 0px), var(--cy, 0px), 0) rotate(0deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :hover > .crosshair {
+    opacity: 1;
+  }
+
+  :hover > .crosshair .crosshair__plus {
+    transform: translate3d(var(--cx, 0px), var(--cy, 0px), 0) rotate(90deg);
+  }
 }
 
 /* Stand-in for artwork that has not been dropped in yet. */
@@ -559,7 +924,14 @@ ul {
 
 /* --- Footer bars --------------------------------------------------------- */
 
+/* Sticky rather than fixed: it rides the bottom of the screen while the page
+   scrolls under it, then settles into its own place at the end, so it never
+   hides the last of the content the way a fixed bar would. The z-index lifts
+   it over the page and its lines, the same way the nav sits over the top. */
 .footer-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
   display: flex;
   align-items: center;
   /* Sits at the very bottom of its page even when the content is short. */
@@ -568,6 +940,25 @@ ul {
   font-size: clamp(0.85rem, 1.5vw, 1.05rem);
   font-weight: 400;
   letter-spacing: 0.01em;
+}
+
+.footer-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.footer-bar__version {
+  opacity: 0.6;
+}
+
+/* The bar is its own stacking layer now, so its marks can't blend with the
+   page above them the way the other line marks do. A flat mid grey reads on
+   the dark bar, the cream one, and anything scrolling past behind. */
+.footer-bar .line-mark {
+  mix-blend-mode: normal;
+  color: var(--grey);
 }
 
 .footer-bar--dark {
@@ -654,10 +1045,7 @@ ul {
 }
 
 .hero__chip {
-  margin-top: -0.55em;
-  margin-left: clamp(6px, 1vw, 14px);
-  position: relative;
-  z-index: 2;
+  margin-bottom: clamp(14px, 2.4vh, 22px);
 }
 
 .hero__tagline {
@@ -723,9 +1111,15 @@ ul {
 
 /* --- About split --------------------------------------------------------- */
 
+/* The split is a percentage rather than fr so the + mark where the cream and
+   coral meet the hero can read the same number (LineMarks' --split). */
 .about {
+  --about-split: 55.36%;
+  --split: var(--about-split);
+
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.24fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, var(--about-split)) minmax(0, 1fr);
   background: var(--cream);
   color: var(--ink);
 }
@@ -738,13 +1132,15 @@ ul {
   padding-left: max(var(--gutter), calc((100vw - var(--maxw)) / 2 + var(--gutter)));
 }
 
+/* Same light display face and bottom fade as the other page titles. One step
+   heavier than them: thin ink strokes on cream read lighter than thin white
+   ones on the dark hero. */
 .about__title {
-  font-family: var(--font-heavy);
-  font-size: clamp(2.1rem, 5.4vw, 3.5rem);
-  font-weight: 400;
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  color: #6e6e6e;
+  font-size: clamp(2.6rem, 6vw, 4.8rem);
+  font-weight: 300;
+  color: var(--ink);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
 }
 
 .about__body {
@@ -783,35 +1179,115 @@ ul {
   margin-top: clamp(28px, 4.5vw, 52px);
 }
 
+/* Squared off, with + marks on the corners. On hover its colour sweeps in
+   from the left — Education in mint, Experience in coral (data-tone) — the
+   label flips to ink, and the marks step out and take the same colour. */
 .pill {
+  --pill-tone: var(--mint);
+  --mark-color: var(--grey);
+
+  position: relative;
+  isolation: isolate;
   display: inline-block;
-  padding: 9px 22px;
-  border-radius: 6px;
+  padding: 10px 24px;
+  border-radius: 0;
   background: var(--ink-3);
   color: #fff;
-  font-size: clamp(0.82rem, 1.2vw, 0.92rem);
-  font-weight: 400;
-  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
-  transition: transform 0.18s var(--ease), background 0.18s var(--ease);
+  font-size: clamp(0.76rem, 1.1vw, 0.84rem);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: color 0.3s var(--ease);
 }
 
-.pill:hover {
-  background: #2b2b2b;
-  transform: translateY(-2px);
+.pill[data-tone='coral'] {
+  --pill-tone: var(--coral);
 }
 
-.pill:active {
-  transform: translateY(0);
+.pill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--pill-tone);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.38s var(--ease);
+}
+
+.pill .mark {
+  transition: transform 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+.pill:hover,
+.pill:focus-visible {
+  color: var(--ink);
+}
+
+.pill:hover::before,
+.pill:focus-visible::before {
+  transform: scaleX(1);
+}
+
+.pill:hover .mark,
+.pill:focus-visible .mark {
+  color: var(--pill-tone);
+}
+
+.pill:hover .mark--tl {
+  transform: translate(-4px, -4px) rotate(90deg);
+}
+
+.pill:hover .mark--tr {
+  transform: translate(4px, -4px) rotate(90deg);
+}
+
+.pill:hover .mark--bl {
+  transform: translate(-4px, 4px) rotate(90deg);
+}
+
+.pill:hover .mark--br {
+  transform: translate(4px, 4px) rotate(90deg);
+}
+
+.pill:active .mark {
+  transform: none;
 }
 
 /* No bottom padding — the figure stands on the panel's lower edge. */
 .about__portrait {
+  position: relative;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   padding: clamp(20px, 3vw, 40px) clamp(14px, 2.2vw, 34px) 0;
   overflow: hidden;
   background: var(--coral);
+}
+
+/* Hairline viewfinder inset in the coral, + on each corner. On hover it pulls
+   in tighter and drifts against the pointer while the photo drifts with it,
+   so the two separate into layers; the Crosshair supplies --px/--py. */
+.about__frame {
+  --frame-inset: clamp(14px, 2vw, 24px);
+  --mark-x: -5px;
+  --mark-y: -5px;
+  --mark-color: var(--cream);
+
+  position: absolute;
+  inset: var(--frame-inset);
+  z-index: 1;
+  border: 1px solid rgba(253, 253, 240, 0.45);
+  pointer-events: none;
+  transform: translate3d(calc(var(--px, 0) * -10px), calc(var(--py, 0) * -8px), 0);
+  transition:
+    inset 0.5s var(--ease),
+    border-color 0.5s var(--ease),
+    transform 0.6s var(--ease);
+}
+
+.about__frame .mark {
+  transition: transform 0.4s var(--ease), color 0.4s var(--ease);
 }
 
 /* Transparent cut-out, so it sits straight on the coral — `contain` keeps the
@@ -823,152 +1299,155 @@ ul {
   object-fit: contain;
   object-position: center bottom;
   filter: drop-shadow(4px 4px 6px rgba(12, 7, 7, 0.55));
+  transform: translate3d(calc(var(--px, 0) * 18px), calc(var(--py, 0) * 10px), 0);
+  transition: transform 0.6s var(--ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .about__portrait:hover .about__frame {
+    --frame-inset: clamp(26px, 3.4vw, 44px);
+    border-color: rgba(253, 253, 240, 0.8);
+  }
+
+  .about__portrait:hover .about__frame .mark {
+    color: var(--ink);
+  }
+
+  .about__portrait:hover .about__frame .mark--tl {
+    transform: translate(-5px, -5px) rotate(90deg);
+  }
+
+  .about__portrait:hover .about__frame .mark--tr {
+    transform: translate(5px, -5px) rotate(90deg);
+  }
+
+  .about__portrait:hover .about__frame .mark--bl {
+    transform: translate(-5px, 5px) rotate(90deg);
+  }
+
+  .about__portrait:hover .about__frame .mark--br {
+    transform: translate(5px, 5px) rotate(90deg);
+  }
 }
 
 /* ===========================================================================
    SECTION 02 — Projects
    ========================================================================= */
 
-.projects {
+/* Pinned rail on the left, three-up grid on the right. Wider than .shell: the
+   grid needs the room, and this page has no full-bleed image to frame it. */
+.work {
+  --rail-top: calc(var(--nav-h) + clamp(24px, 4vh, 48px));
+  --rail-foot: clamp(28px, 5vh, 56px);
+
   position: relative;
   flex: 1 0 auto;
-  background: var(--ink);
-  padding-top: calc(var(--nav-h) + clamp(30px, 5vh, 56px));
-  padding-bottom: clamp(24px, 5vh, 56px);
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.projects__media {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
+  display: grid;
+  grid-template-columns: clamp(230px, 24%, 400px) minmax(0, 1fr);
+  /* The page stretches this to the viewport; without `start` the rows would
+     share out that slack, opening a gap under the rail once it stacks. */
+  align-content: start;
+  column-gap: clamp(28px, 4vw, 64px);
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Source is wider than the tab, so cover crops the sides. Bias left to keep
-     the bright, sharp colour wheel + RGB labels in frame and trim the dark
-     bokeh on the right. (Shared by both tab backdrops.) */
-  object-position: 35% 50%;
-  border: 0;
-  border-radius: 0;
+  max-width: 1680px;
+  margin-inline: auto;
+  padding: var(--rail-top) var(--gutter) clamp(56px, 9vh, 110px);
+}
+
+.work__rail {
+  position: sticky;
+  top: var(--rail-top);
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--rail-top) - var(--rail-foot));
+  height: calc(100svh - var(--rail-top) - var(--rail-foot));
+  min-height: 440px;
+}
+
+.work__head {
+  display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  padding-top: calc(var(--nav-h) + 24px);
-  background:
-    repeating-linear-gradient(
-      -45deg,
-      rgba(255, 255, 255, 0.035) 0 1px,
-      transparent 1px 14px
-    ),
-    linear-gradient(150deg, #232323 0%, #171717 52%, #0d0d0d 100%);
-  color: rgba(255, 255, 255, 0.26);
+  gap: clamp(18px, 3vh, 32px);
 }
 
-/* Heavy wash — this page is dense, so the cards and type have to stay legible
-   over whatever image ends up back there. */
-.projects__scrim {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(
-    180deg,
-    rgba(10, 10, 10, 0.85) 0%,
-    rgba(10, 10, 10, 0.82) 12%,
-    rgba(10, 10, 10, 0.6) 28%,
-    rgba(10, 10, 10, 0.8) 50%,
-    rgba(10, 10, 10, 0.9) 65%,
-    rgba(10, 10, 10, 0.94) 100%
-  );
-}
-
-.projects__head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: clamp(20px, 4vw, 48px);
-  flex-wrap: wrap-reverse;
-}
-
-.tabs {
-  display: flex;
-  gap: clamp(10px, 1.8vw, 24px);
-  padding-bottom: 6px;
-}
-.tab {
-  --tab-tone: var(--mint);
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 9px 26px;
-  border-radius: 10px;
-  font-size: clamp(0.82rem, 1.2vw, 0.94rem);
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  /* Solid tone button with dark ink text for contrast on the bright colours.
-     Inactive tabs are dimmed; the active one is full strength (below). */
-  color: var(--ink);
-  background: var(--tab-tone);
-  border: 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-  opacity: 0.55;
-  transition: transform 0.22s var(--ease), opacity 0.22s var(--ease),
-    box-shadow 0.22s var(--ease);
-}
-
-/* Videos = solid red, Programs = solid teal. */
-.tab[data-tone='videos'] {
-  --tab-tone: var(--coral);
-}
-
-.tab[data-tone='programs'] {
-  --tab-tone: var(--mint);
-}
-
-.tab:hover {
-  transform: translateY(-2px);
-  opacity: 0.82;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-}
-
-/* Selected: full colour. */
-.tab--active {
-  opacity: 1;
-}
-
-.projects__titlewrap {
-  text-align: right;
-  margin-left: auto;
-}
-
-.projects__title {
-  font-size: clamp(2.6rem, 9.2vw, 7rem);
-    -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 50%);
+/* Same light display face and bottom fade as the home and contact titles,
+   sized so the one word always fits the rail's width. */
+.work__title {
+  font-size: clamp(2.2rem, 4.4vw, 4.4rem);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
 }
 
-.projects__chip {
-  margin-top: -0.5em;
-  margin-right: clamp(10px, 2.4vw, 34px);
-  position: relative;
-  z-index: 2;
+/* Floats in the middle of whatever height the rail has left. */
+.work__filters {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 4.5vh, 44px);
+  margin-block: auto;
+  padding-block: 32px;
 }
 
-/* --- Tools used ---------------------------------------------------------- */
+.work__tabs {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(14px, 2.6vh, 24px);
+}
+
+/* Videos = coral, Programs = mint, as the tabs have always been — only the
+   selected one takes its colour; the rest wait in grey. */
+.work__tab {
+  --tab-tone: var(--mint);
+
+  padding: 2px 0;
+  font-size: clamp(0.8rem, 0.95vw, 0.9rem);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--grey);
+  transition: color 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.work__tab[data-tone='videos'] {
+  --tab-tone: var(--coral);
+}
+
+.work__tab:hover {
+  color: #fff;
+  transform: translateX(3px);
+}
+
+.work__tab[aria-selected='true'] {
+  color: var(--tab-tone);
+  transform: none;
+}
+
+.work__blurb {
+  max-width: 30ch;
+  font-size: clamp(0.9rem, 1.1vw, 1.02rem);
+  line-height: 1.6;
+  color: var(--grey);
+  text-wrap: pretty;
+}
+
+/* --- Tools used / categories (rail groups) ------------------------------- */
 
 .tools {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: clamp(10px, 1.8vw, 20px);
-  margin-top: clamp(18px, 3vh, 32px);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  animation: tab-wipe 0.58s cubic-bezier(0.66, 0, 0.28, 1);
 }
 
 .tools__label {
-  font-size: clamp(0.82rem, 1.35vw, 1rem);
-  font-weight: 400;
-  letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: var(--grey);
 }
 
 .tools__list {
@@ -998,7 +1477,7 @@ ul {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Rounding lives on the image now (was `overflow: hidden` on the tile) so the
+  /* Rounding lives on the image (not `overflow: hidden` on the tile) so the
      hover tooltip can escape the tile instead of being clipped by it. */
   border-radius: 8px;
 }
@@ -1048,129 +1527,83 @@ ul {
   transform: translateX(-50%) translateY(0);
 }
 
-/* --- Program categories -------------------------------------------------- */
-
-/* The row itself reuses .tools, so the label, spacing and tab-wipe animation
-   match the Videos tab exactly — only the chips differ from the logo tiles. */
 .cats__list {
-  --cat-accent: var(--mint);
-
   display: flex;
-  flex-wrap: wrap;
-  gap: clamp(8px, 1.1vw, 12px);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
 }
 
-/* Accents alternate down the row, so a new category is styled the moment it is
-   added. Set on the <li> rather than the chip itself: the chip is an only
-   child, so :nth-child on it would always match odd. Add a third selector here
-   if you ever want a third colour in play. */
-.cats__list > li:nth-child(odd) {
-  --cat-accent: var(--mint);
-}
-
-.cats__list > li:nth-child(even) {
-  --cat-accent: var(--coral);
-}
-
-/* Flat plate on a hard bottom shadow, lifting on hover. Unselected chips are
-   grey and only the selected one takes its accent, so the accent itself is the
-   selection cue. Border is transparent rather than absent, so gaining one when
-   selected does not shift the row by a pixel. */
+/* Indented under the tabs with a short lead rule, so it reads as a sub-filter
+   of Programs rather than a third tab. */
 .cats__item {
-  padding: 8px 26px;
-  border-radius: 6px;
-  background: var(--ink-4);
-  border: 1px solid transparent;
-  color: rgba(255, 255, 255, 0.42);
-  font-size: clamp(0.76rem, 1.1vw, 0.86rem);
-  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
-  transition: color 0.2s var(--ease), background 0.2s var(--ease),
-    border-color 0.2s var(--ease), transform 0.18s var(--ease);
+  position: relative;
+  padding: 1px 0 1px 16px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--grey);
+  transition: color 0.2s var(--ease);
+}
+
+.cats__item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 8px;
+  height: 1px;
+  background: currentColor;
 }
 
 .cats__item:hover {
-  color: rgba(255, 255, 255, 0.8);
-  transform: translateY(-2px);
+  color: #fff;
 }
 
 .cats__item--active {
-  background: var(--ink-3);
-  border-color: rgba(255, 255, 255, 0.08);
-  color: var(--cat-accent);
+  color: var(--mint);
 }
 
-/* The grid scrolls inside a fixed viewport with a fade-out at the bottom edge,
-   matching the mockup's cropped second row. */
-.projects__scroll {
-  margin-top: clamp(26px, 4.5vh, 48px);
-  max-height: clamp(420px, 56vh, 620px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
-}
+/* --- Grid ----------------------------------------------------------------- */
 
-/* Only fade the bottom edge when there is actually more content below. */
-.projects__scroll[data-overflow='true'] {
-  padding-bottom: 120px;
-  -webkit-mask-image: linear-gradient(
-    180deg,
-    #000 0%,
-    #000 calc(100% - 150px),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    180deg,
-    #000 0%,
-    #000 calc(100% - 150px),
-    transparent 100%
-  );
-}
-
-.projects__scroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.projects__scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.16);
-  border-radius: 99px;
-}
-
-.grid {
+.work__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(20px, 3.4vw, 44px) clamp(18px, 2.6vw, 34px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
+  gap: clamp(36px, 6vh, 60px) clamp(18px, 2.2vw, 36px);
   animation: tab-wipe 0.52s cubic-bezier(0.66, 0, 0.28, 1);
 }
 
-/* Shown when the selected category has nothing filed under it yet. Spans the
-   full grid so it centres against the row of cards it stands in for. */
-.grid__empty {
+/* Shown when the selected category has nothing filed under it yet. */
+.work__empty {
   grid-column: 1 / -1;
   display: grid;
   place-items: center;
   min-height: clamp(160px, 22vh, 240px);
-  border-radius: 12px;
   border: 1px dashed rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.02);
   color: rgba(255, 255, 255, 0.5);
-  font-size: clamp(0.72rem, 1.1vw, 0.84rem);
+  font-size: 0.76rem;
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  text-align: center;
-}
-
-.tools,
-.projects__media {
-  animation: tab-wipe 0.58s cubic-bezier(0.66, 0, 0.28, 1);
 }
 
 /* --- Cards --------------------------------------------------------------- */
 
 .card {
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   min-width: 0;
+  margin: 0;
+}
+
+/* Hairlines above and below the frame, with a registration mark on each
+   corner — the frame sits inset inside it. */
+/* The frame (hairlines, marks and their hover) comes from .frame. */
+.card__box {
+  padding: 7px;
 }
 
 .card__frame {
@@ -1180,20 +1613,7 @@ ul {
   /* Matches standard 16:9 footage, so nothing gets cropped on playback. */
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  border-radius: 10px;
-  background: var(--coral);
-  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
-}
-
-/* Stay put once a video is playing — a hover lift under the cursor makes the
-   native controls harder to hit. */
-.card__frame:not([data-playing='true']):hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
-}
-
-.card--program .card__frame {
-  background: var(--teal);
+  background: #151515;
 }
 
 .card__frame .ph {
@@ -1206,6 +1626,24 @@ ul {
     rgba(255, 255, 255, 0.08) 0 1px,
     transparent 1px 13px
   );
+}
+
+/* Thumbnail shown before playback starts, and the program card images. */
+.card__thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* A slow push into the image rather than lifting the card — the frame stays
+   put, so the registration marks never drift off their corners. */
+@media (hover: hover) {
+  .card__frame:hover .card__thumb {
+    transform: scale(1.045);
+  }
 }
 
 .card__video {
@@ -1237,15 +1675,6 @@ ul {
   object-fit: contain;
 }
 
-/* Thumbnail shown before playback starts. */
-.card__thumb {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 /* Covers the whole box so pressing anywhere on the card starts playback. */
 .card__play {
   position: absolute;
@@ -1257,14 +1686,14 @@ ul {
   height: 100%;
   color: #fff;
   cursor: pointer;
-  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
 }
 
 .card__play svg {
-  width: clamp(44px, 5vw, 58px);
-  height: clamp(44px, 5vw, 58px);
-  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.4));
-  opacity: 0.9;
+  width: clamp(38px, 3.6vw, 50px);
+  height: clamp(38px, 3.6vw, 50px);
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.45));
+  opacity: 0.78;
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
 }
 
 .card__frame:hover .card__play svg {
@@ -1272,35 +1701,43 @@ ul {
   opacity: 1;
 }
 
-/* Title overlay — bottom-left, on every video and program card. */
-.card__overlay {
+/* Award (videos) or category (programs), pinned bottom-left of the frame. */
+.card__tag {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: 10px;
+  bottom: 10px;
   z-index: 3;
-  padding: 34px 16px 12px;
-  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.42));
-  color: #fff;
-  font-size: clamp(0.8rem, 1.15vw, 0.95rem);
-  font-weight: 400;
-  line-height: 1.35;
-  text-align: left;
+  max-width: calc(100% - 20px);
+  padding: 6px 8px 5px;
+  background: #1b1b1b;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   pointer-events: none;
-  transition: transform 0.25s var(--ease), opacity 0.25s var(--ease);
+  transition: opacity 0.2s var(--ease);
 }
 
-/* Player is mounted: drop the gradient and clear the native control bar, which
-   is ~48px tall at this card size. This is the paused state. */
-.card__frame[data-playing='true'] .card__overlay {
-  transform: translateY(-54px);
-  background: none;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+.card__tag[data-tone='award'] {
+  color: var(--coral);
 }
 
-/* Actually rolling: get the title out of the frame entirely. */
-.card__frame[data-live='true'] .card__overlay {
+.card__tag[data-tone='category'] {
+  color: var(--mint);
+}
+
+/* Out of the way of the native control bar once the player is mounted. */
+.card__frame[data-playing='true'] .card__tag {
   opacity: 0;
+}
+
+/* No viewfinder over footage that's actually playing. */
+.card__frame[data-playing='true'] > .crosshair {
+  display: none;
 }
 
 .card__fallback {
@@ -1330,22 +1767,68 @@ ul {
 
 .card__meta {
   display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-inline: 1px;
+}
+
+.card__label {
+  display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 14px;
-  margin-top: 12px;
-  font-size: clamp(0.72rem, 1.05vw, 0.86rem);
-  color: rgba(255, 255, 255, 0.88);
+}
+
+.card__title {
+  font-size: clamp(0.84rem, 0.95vw, 0.94rem);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #fff;
+  text-wrap: balance;
+}
+
+.card__action {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--grey);
+  transition: color 0.2s var(--ease);
+}
+
+.card__action svg {
+  width: 9px;
+  height: 9px;
+  color: var(--mint);
+  transition: transform 0.2s var(--ease);
+}
+
+.card:hover .card__action {
+  color: #fff;
+}
+
+.card--program:hover .card__action svg {
+  transform: translate(2px, -2px);
 }
 
 .card__award {
-  font-weight: 400;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .card__roles {
-  margin-left: auto;
-  text-align: right;
-  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--grey);
 }
 
 /* ===========================================================================
@@ -1412,39 +1895,41 @@ ul {
 
 
 .talk__chip {
-  margin-top: -0.42em;
-  margin-left: clamp(6px, 1.4vw, 16px);
-  position: relative;
-  z-index: 2;
+  margin-bottom: clamp(14px, 2.4vh, 22px);
 }
 
 .talk__block {
-  margin-top: clamp(30px, 5vh, 58px);
+  margin-top: clamp(30px, 5vh, 52px);
 }
 
+/* Small caps label over each list, in the rail-label voice from Projects. */
 .talk__label {
   color: var(--mint);
-  font-size: clamp(0.95rem, 1.6vw, 1.16rem);
-  font-weight: 400;
+  font-size: clamp(0.68rem, 0.9vw, 0.76rem);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
+/* Framed like a project card (.frame), holding links instead of a thumbnail. */
 .talk__list {
   display: grid;
-  gap: clamp(8px, 1.4vh, 14px);
-  margin-top: clamp(12px, 2vh, 20px);
+  width: min(100%, 360px);
+  margin-top: clamp(12px, 2vh, 18px);
+  padding: 6px 0;
 }
 
 .talk__list--socials {
-  grid-template-columns: repeat(2, minmax(0, max-content));
-  column-gap: clamp(28px, 6vw, 84px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(20px, 3vw, 40px);
+  width: min(100%, 460px);
 }
 
 .talk__item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 14px;
-  width: fit-content;
-  padding: 4px 2px;
+  padding: 10px 2px;
   font-size: clamp(0.9rem, 1.4vw, 1.02rem);
   color: rgba(255, 255, 255, 0.92);
   transition: color 0.2s var(--ease), transform 0.2s var(--ease);
@@ -1452,7 +1937,7 @@ ul {
 
 .talk__item:hover {
   color: var(--mint);
-  transform: translateX(3px);
+  transform: translateX(4px);
 }
 
 .talk__item svg {
@@ -1631,6 +2116,14 @@ ul {
    Responsive — the mockup layout holds down to phone widths, then stacks.
    ========================================================================= */
 
+/* Three-up needs ~250px cards beside the rail; below this they'd shrink to
+   thumbnails, so drop to two. */
+@media (max-width: 1180px) {
+  .work__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 860px) {
   :root {
     --nav-h: 62px;
@@ -1710,38 +2203,51 @@ ul {
     text-align: left;
   }
 
-  .projects__head {
-    flex-direction: column-reverse;
-    align-items: flex-start;
-    /* Reset the desktop wrap-reverse: with a column direction it flips the
-       cross-axis, so flex-start would right-align the tabs/title instead of
-       left. nowrap keeps them stacked and left-aligned above the tools row. */
-    flex-wrap: nowrap;
-    gap: 22px;
-  }
-
-  .projects__titlewrap {
-    margin-left: 0;
-    text-align: left;
-  }
-
-  .projects__chip {
-    margin-right: 0;
-    margin-left: clamp(8px, 2vw, 18px);
-  }
-
-  /* Full height on phones — nothing hidden behind a fade. */
-  .projects__scroll,
-  .projects__scroll[data-overflow='true'] {
-    max-height: none;
-    overflow: visible;
-    padding-bottom: 0;
-    -webkit-mask-image: none;
-    mask-image: none;
-  }
-
-  .grid {
+  /* The rail unpins and stacks over the grid; the tabs and their filter group
+     lie down into a row so the cards start within the first screen. */
+  .work {
     grid-template-columns: minmax(0, 1fr);
+    row-gap: 40px;
+  }
+
+  /* Stacked, the cream and coral no longer meet the hero side by side. */
+  .about .line-mark--split {
+    display: none;
+  }
+
+  /* The photo breaks out of the top of the coral here, so an inset frame
+     would cut straight across it. */
+  .about__frame {
+    display: none;
+  }
+
+  .work__rail {
+    position: static;
+    height: auto;
+    min-height: 0;
+  }
+
+  .work__filters {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 22px 44px;
+    margin: 32px 0 0;
+    padding: 0;
+  }
+
+  .work__tabs {
+    flex-direction: row;
+    gap: 24px;
+  }
+
+  .work__blurb {
+    margin-top: 22px;
+  }
+
+  /* The intro frame starts tighter to the edges on a phone. */
+  .intro {
+    --inset: 1.25rem;
   }
 
   .talk {
@@ -1756,13 +2262,15 @@ ul {
   }
 }
 
+@media (max-width: 560px) {
+  .work__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 460px) {
   .talk__list--socials {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .card__overlay {
-    padding: 28px 12px 10px;
   }
 }
 
@@ -1778,5 +2286,10 @@ ul {
      removes the travel between the two positions, which is the point. */
   .music__knob {
     transition-duration: 0.01ms !important;
+  }
+
+  /* An infinite loop squeezed to 0.01ms would strobe, not stop. */
+  .intro[data-ready='true'] .intro__enter {
+    animation: none;
   }
 }
