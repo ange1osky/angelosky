@@ -3,8 +3,8 @@ import { PlayIcon } from './Icons.jsx'
 import CornerMarks from './CornerMarks.jsx'
 import Crosshair from './Crosshair.jsx'
 import { claimAudio, releaseAudio } from '../hooks/useAudioFocus.js'
-import { useAudioBoost } from '../hooks/useAudioBoost.js'
-import { VIDEO_BOOST } from '../data/content.js'
+import { ON_PHONE, useAudioBoost } from '../hooks/useAudioBoost.js'
+import { VIDEO_BOOST, VIDEO_PHONE_VOLUME } from '../data/content.js'
 
 /* Thumbnail until it is pressed; then the <video> mounts and plays in place.
    The title and roles sit under the frame, so nothing covers the footage. */
@@ -15,8 +15,9 @@ export default function VideoCard({ item, activeId, onActivate }) {
   const videoRef = useRef(null)
   const live = playing && !paused
 
-  // Push clip audio past the element's 100% ceiling toward desktop loudness.
-  useAudioBoost(videoRef, VIDEO_BOOST, playing)
+  // Push clip audio past the element's 100% ceiling toward desktop loudness —
+  // or, on a phone, well below it.
+  useAudioBoost(videoRef, ON_PHONE ? VIDEO_PHONE_VOLUME : VIDEO_BOOST, playing)
 
   const start = () => {
     // Claim the single-play slot in the same batch as `playing`, so the effect

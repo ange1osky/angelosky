@@ -5,7 +5,7 @@
 
 export const BRAND = 'angelosky'
 export const COPYRIGHT = '© 2026 | angelosky'
-export const VERSION = 'version 3.0' // right end of the footer bar
+export const VERSION = 'version 3.1' // right end of the footer bar
 
 export const SECTIONS = [
   { id: 'home', label: 'Home' },
@@ -15,15 +15,20 @@ export const SECTIONS = [
 
 export const MUSIC = {
   src: '/audio/music.mp3',
-  volume: 0.85,   // base level, 0–1, before the boost below
-  boost: 1.5,     // Web Audio gain (>1) so the bed can exceed the 100% cap
+  volume: 0.85,       // computer: base level, 0–1, before the boost below
+  boost: 1.5,         // computer: Web Audio gain (>1) so the bed can exceed the 100% cap
+  phoneVolume: 0.35,  // phones and tablets: the whole level, 0–1, no boost
 }
 
 /* Clips are authored at wildly different levels, and the browser caps a plain
-   <video> at 100%. This Web Audio gain (>1) lifts the quiet ones toward the
-   loudness they'd have in a desktop player; a limiter in useAudioBoost tames
-   the peaks so it stays clean. */
+   <video> at 100%. On a computer this Web Audio gain (>1) lifts the quiet ones
+   toward the loudness they'd have in a desktop player; a limiter in
+   useAudioBoost tames the peaks so it stays clean. */
 export const VIDEO_BOOST = 1.8
+
+/* Phones and tablets use this instead: the whole level, 0–1, no boost. Kept
+   above MUSIC.phoneVolume, since a clip is what you came to watch. */
+export const VIDEO_PHONE_VOLUME = 0.6
 
 /* --- Home ---------------------------------------------------------------- */
 
@@ -89,11 +94,15 @@ export const PANELS = {
 /* --- Projects ------------------------------------------------------------ */
 
 /* The pinned column on the left of the projects page. `badge` is the tag above
- * the title; `blurb` sits at the foot of the column — set it to '' to drop it. */
+ * the title; `blurb` sits at the foot of the column, one line per tab — it
+ * swaps when the tab does. Set a tab's line to '' to drop it there. */
 export const PROJECTS_HEAD = {
   badge: 'PAGE 02',
   title: 'PROJECTS',
-  blurb: "Everything I've shot, cut and colaborated on, all in one page.",
+  blurb: {
+    videos: "Everything I've shot, cut and colaborated on, all in one page.",
+    programs: 'New to coding, kinda nervous...',
+  },
 }
 
 /* 19 video slots — one line each so they're quick to edit.

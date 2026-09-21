@@ -74,7 +74,12 @@ export default function Projects() {
             )}
           </div>
 
-          {PROJECTS_HEAD.blurb && <p className="work__blurb">{PROJECTS_HEAD.blurb}</p>}
+          {/* Keyed on the tab so the new line wipes in with the grid. */}
+          {PROJECTS_HEAD.blurb?.[tab] && (
+            <p key={tab} className="work__blurb">
+              {PROJECTS_HEAD.blurb[tab]}
+            </p>
+          )}
         </aside>
 
         {/* Category is part of the key so switching filters replays the same

@@ -3,36 +3,70 @@ import { MUSIC } from '../data/content.js'
 import { HeadphonesIcon } from './Icons.jsx'
 import { useAudioTaken } from '../hooks/useAudioFocus.js'
 import { useMusicEnabled, setMusicEnabled } from '../hooks/useMusicPref.js'
-import { useAudioBoost } from '../hooks/useAudioBoost.js'
+import { ON_PHONE, audioGraph, resumeAudio } from '../hooks/useAudioBoost.js'
+import usePageVisible from '../hooks/usePageVisible.js'
 
 /* Remembered across reloads, but see the play effect — a stored 'on' is a
    request to play, not a guarantee the browser will allow it. */
 const FADE_MS = 420
 
-/* `volume` is hand-edited in content.js and 0–1 reads like a percentage to
-   anyone who hasn't met the media API, so clamp it once here. Out of range is
-   worse than it looks: assigning >1 to el.volume throws, and ramping *toward*
-   100 clears 1.0 inside the first frame, which silently costs you the fade. */
-const TARGET_VOLUME = Math.min(1, Math.max(0, Number(MUSIC.volume) || 0.35))
+// The settings are hand-edited in content.js; keep a stray value in range.
+const clamp01 = (n) => Math.min(1, Math.max(0, n))
 
-/* Ramps volume rather than cutting it. A music bed that snaps to full level is
-   jarring next to the eased motion everywhere else, and the fade doubles as the
-   hand-off when a video takes over. Returns a canceller so a fast second toggle
-   doesn't fight the ramp already in flight. */
-function fadeTo(el, target, onDone) {
+/* How loud the bed ends up, as a single gain. On a computer it's `volume`
+   times `boost`, so it can pass the 100% an <audio> element tops out at. On a
+   phone it's `phoneVolume` on its own, far lower: the speaker is small and
+   close, and iOS ignores an element's own volume altogether, so the level a
+   laptop needs came out blaring even with the phone turned down. */
+const LEVEL = ON_PHONE
+  ? clamp01(Number(MUSIC.phoneVolume) || 0.35)
+  : clamp01(Number(MUSIC.volume) || 0.35) * Math.max(1, Number(MUSIC.boost) || 1)
+
+/* Ramps the level rather than cutting it. A music bed that snaps to full level
+   is jarring next to the eased motion everywhere else, and the fade doubles as
+   the hand-off when a video takes over. Returns a canceller so a fast second
+   toggle doesn't fight the ramp already in flight.
+
+   The ramp runs on the Web Audio gain wherever the track is wired through one —
+   that is the only volume iOS respects — and falls back to stepping the
+   element's own volume (capped at 1) where Web Audio isn't available. */
+function fadeTo(el, graph, target, onDone) {
+  if (graph) {
+    const param = graph.gain.gain
+    const now = graph.gain.context.currentTime
+    param.cancelScheduledValues(now)
+    param.setValueAtTime(param.value, now)
+    param.linearRampToValueAtTime(target, now + FADE_MS / 1000)
+    const timer = window.setTimeout(() => onDone?.(), FADE_MS)
+    return () => window.clearTimeout(timer)
+  }
+
   const from = el.volume
+  const to = clamp01(target)
   const start = performance.now()
   let raf = 0
 
   const step = (now) => {
     const t = Math.min(1, (now - start) / FADE_MS)
-    el.volume = Math.max(0, Math.min(1, from + (target - from) * t))
+    el.volume = clamp01(from + (to - from) * t)
     if (t < 1) raf = requestAnimationFrame(step)
     else onDone?.()
   }
 
   raf = requestAnimationFrame(step)
   return () => cancelAnimationFrame(raf)
+}
+
+// Starts a ramp from true silence, wherever the level lives.
+function silence(el, graph) {
+  if (graph) {
+    const param = graph.gain.gain
+    param.cancelScheduledValues(graph.gain.context.currentTime)
+    param.value = 0
+    el.volume = 1
+  } else {
+    el.volume = 0
+  }
 }
 
 /* Sits left of the brand in the nav. Deliberately starts silent: browsers block
@@ -49,39 +83,56 @@ export default function MusicToggle() {
   const cancelFade = useRef(null)
 
   const videoTaken = useAudioTaken()
-  const shouldPlay = enabled && !videoTaken && !broken
+  /* Out of sight, out of earshot: the bed stops when the visitor switches tab,
+     minimises, or leaves for another app, and picks up where it left off when
+     they come back. `enabled` is untouched, so the switch keeps reading ON. */
+  const visible = usePageVisible()
+  const shouldPlay = enabled && !videoTaken && !broken && visible
 
-  // Lets the bed climb past the element's 100% cap. Multiplies the fade below,
-  // so the ramp still runs smoothly to TARGET_VOLUME × boost.
-  useAudioBoost(audioRef, Number(MUSIC.boost) || 1)
-
-  /* The single place playback is driven. Everything else just moves `enabled`
-     or claims audio focus, and this effect reconciles the element to match. */
+  /* The single place playback is driven. Everything else just moves `enabled`,
+     claims audio focus or changes visibility, and this effect reconciles the
+     element to match. */
   useEffect(() => {
     const el = audioRef.current
     if (!el) return
     cancelFade.current?.()
+    // A play() that resolves after this run is superseded must not start a
+    // fade of its own.
+    let current = true
 
     if (shouldPlay) {
-      el.volume = 0
+      const graph = audioGraph(el)
+      silence(el, graph)
+      resumeAudio()
       el.play().then(
         () => {
-          cancelFade.current = fadeTo(el, TARGET_VOLUME)
+          if (current) cancelFade.current = fadeTo(el, graph, LEVEL)
         },
-        () => {
+        (err) => {
           // Autoplay policy refused us — there has been no gesture yet. Drop
           // `enabled` so the button shows off rather than claiming to play
           // something silent; one press then starts it for real. Don't persist
           // it — the visitor never asked for off, the browser just stalled.
-          setMusicEnabled(false, { persist: false })
+          // Only NotAllowedError means that: an AbortError is our own pause()
+          // (say, leaving the tab mid-start) cutting the request short.
+          if (err?.name === 'NotAllowedError') setMusicEnabled(false, { persist: false })
         }
       )
     } else if (!el.paused) {
-      cancelFade.current = fadeTo(el, 0, () => el.pause())
+      if (!visible) {
+        // Stop at once. A hidden page gets no animation frames and slowed
+        // timers, so a fade-out would stall and leave it playing unseen.
+        el.pause()
+      } else {
+        cancelFade.current = fadeTo(el, audioGraph(el), 0, () => el.pause())
+      }
     }
 
-    return () => cancelFade.current?.()
-  }, [shouldPlay])
+    return () => {
+      current = false
+      cancelFade.current?.()
+    }
+  }, [shouldPlay, visible])
 
   if (!MUSIC.src || broken) return null
 

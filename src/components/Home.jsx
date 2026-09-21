@@ -20,23 +20,28 @@ export default function Home() {
         />
         <div className="hero__scrim" aria-hidden="true" />
 
+        {/* Three levels: a small intro line, the title as big as the width
+            allows, and the tagline tucked under the title's right end. */}
         <div className="shell hero__inner">
-          <div>
-            <span className="page-chip hero__chip">{HERO.page}</span>
+          <div className="hero__intro">
+            <span className="page-chip">{HERO.page}</span>
             <p className="hero__kicker">{HERO.kicker}</p>
-            <h1 className="display hero__title">{HERO.title}</h1>
           </div>
 
-          <p className="hero__tagline">
-            {HERO.tagline.map((part) => (
-              <span
-                key={part.text}
-                className={part.tone === 'plain' ? undefined : `tone-${part.tone}`}
-              >
-                {part.text}
-              </span>
-            ))}
-          </p>
+          <div className="hero__head">
+            <h1 className="display hero__title">{HERO.title}</h1>
+
+            <p className="hero__tagline">
+              {HERO.tagline.map((part) => (
+                <span
+                  key={part.text}
+                  className={part.tone === 'plain' ? undefined : `tone-${part.tone}`}
+                >
+                  {part.text}
+                </span>
+              ))}
+            </p>
+          </div>
         </div>
 
         <div className="hero__badge">
