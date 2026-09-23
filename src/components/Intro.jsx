@@ -100,7 +100,8 @@ function measure(root) {
 function keyframes(place, g) {
   const at = PLACES[place]
   return FRAME_STOPS.map((s) => {
-    const slide = (g.inset + 2) * (s.enter - 1)
+    // Starts far enough out that the corner marks' arms are off-screen too.
+    const slide = (g.inset + 12) * (s.enter - 1)
     const x = slide + (g.w / 2 - g.box - g.inset) * s.z
     const y = slide + (g.h / 2 - g.box - g.inset) * s.z
     return { offset: s.t / TOTAL, easing: s.ease, transform: at(x, y) }
@@ -279,7 +280,7 @@ export default function Intro({ onDone, onEnter }) {
     if (!root || !canvas) return
 
     const prepare = () => {
-      const color = getComputedStyle(root).getPropertyValue('--intro-bg').trim() || '#6fe7d2'
+      const color = getComputedStyle(root).getPropertyValue('--intro-bg').trim() || '#1c1c1c'
       playDissolve.current = prepareDissolve(canvas, root, color)
     }
     prepare()

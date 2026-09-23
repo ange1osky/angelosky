@@ -49,7 +49,18 @@ export default function Modal({ panel, onClose }) {
               {group.items.map((item) => (
                 <li className="modal__entry" key={item.title}>
                   <p className="modal__entry-title">{item.title}</p>
-                  {item.meta && <p className="modal__entry-meta">{item.meta}</p>}
+                  {item.details?.length ? (
+                    <details className="modal__entry-more">
+                      <summary className="modal__entry-meta">{item.meta || 'More'}</summary>
+                      <ul className="modal__entry-details">
+                        {item.details.map((line) => (
+                          <li key={line}>{line}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  ) : (
+                    item.meta && <p className="modal__entry-meta">{item.meta}</p>
+                  )}
                 </li>
               ))}
             </ul>

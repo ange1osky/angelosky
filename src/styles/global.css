@@ -173,17 +173,18 @@ ul {
   }
 }
 
-/* First-load preloader. A mint panel with a frame of hairlines that slide in
+/* First-load preloader. A near-black panel with a frame of hairlines that slide in
    from the edges, then close in on the centre as the count climbs — ending as
    a small box round "100%", which turns into the Enter prompt. The frame's
    motion is played by Intro.jsx as Web Animations; the transforms below are
    only where each piece waits, just off-screen, before they start. */
 .intro {
-  --intro-bg: var(--mint);
-  --intro-line: #3fbfa9;
-  --intro-ink: var(--ink);
+  --intro-bg: #0d0d0d;
+  --intro-line: #f2f2f2;
+  --intro-ink: #fff;
   --inset: 2rem;
-  --off: calc(var(--inset) + 2px);
+  --plus: 17px;
+  --off: calc(var(--inset) + 12px);
 
   position: fixed;
   inset: 0;
@@ -245,36 +246,36 @@ ul {
   transform: translate3d(0, var(--off), 0);
 }
 
-/* 9px marks centred on each line crossing, riding both lines that meet there. */
+/* 17px marks (strokes ~2px thick) centred on each line crossing, riding both lines that meet there. */
 .intro__plus {
   position: absolute;
-  width: 9px;
-  height: 9px;
+  width: var(--plus);
+  height: var(--plus);
   color: var(--intro-ink);
   will-change: transform;
 }
 
 .intro__plus--tl {
-  top: calc(var(--inset) - 4px);
-  left: calc(var(--inset) - 4px);
+  top: calc(var(--inset) - var(--plus) / 2 + 0.5px);
+  left: calc(var(--inset) - var(--plus) / 2 + 0.5px);
   transform: translate3d(calc(var(--off) * -1), calc(var(--off) * -1), 0);
 }
 
 .intro__plus--tr {
-  top: calc(var(--inset) - 4px);
-  right: calc(var(--inset) - 4px);
+  top: calc(var(--inset) - var(--plus) / 2 + 0.5px);
+  right: calc(var(--inset) - var(--plus) / 2 + 0.5px);
   transform: translate3d(var(--off), calc(var(--off) * -1), 0);
 }
 
 .intro__plus--bl {
-  bottom: calc(var(--inset) - 4px);
-  left: calc(var(--inset) - 4px);
+  bottom: calc(var(--inset) - var(--plus) / 2 + 0.5px);
+  left: calc(var(--inset) - var(--plus) / 2 + 0.5px);
   transform: translate3d(calc(var(--off) * -1), var(--off), 0);
 }
 
 .intro__plus--br {
-  bottom: calc(var(--inset) - 4px);
-  right: calc(var(--inset) - 4px);
+  bottom: calc(var(--inset) - var(--plus) / 2 + 0.5px);
+  right: calc(var(--inset) - var(--plus) / 2 + 0.5px);
   transform: translate3d(var(--off), var(--off), 0);
 }
 
@@ -876,8 +877,9 @@ ul {
   transition: transform 0.28s var(--ease);
 }
 
-.nav__link:hover {
-  color: #fff;
+.nav__link:hover,
+.nav__link--active:hover {
+  color: var(--mint);
 }
 
 .nav__link:hover::after,
@@ -2130,6 +2132,57 @@ ul {
   font-weight: 500;
   line-height: 1.45;
   color: #6b6b6b;
+}
+
+/* Entries with `details` — the meta line doubles as the toggle. */
+.modal__entry-more > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+  cursor: pointer;
+  transition: color 0.2s var(--ease);
+}
+
+.modal__entry-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.modal__entry-more > summary::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.2s var(--ease);
+}
+
+.modal__entry-more > summary:hover,
+.modal__entry-more[open] > summary {
+  color: var(--coral);
+}
+
+.modal__entry-more[open] > summary::after {
+  margin-top: 3px;
+  transform: rotate(225deg);
+}
+
+.modal__entry-details {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+  padding-left: 18px;
+  list-style: disc;
+  font-size: clamp(0.8rem, 1.15vw, 0.88rem);
+  line-height: 1.5;
+  color: #4a4a4a;
+  animation: fade-in 0.2s var(--ease);
+}
+
+.modal__entry-details li::marker {
+  color: var(--coral);
 }
 
 .modal__close {

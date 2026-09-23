@@ -1,9 +1,60 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import FooterBar from './FooterBar.jsx'
 import CornerMarks from './CornerMarks.jsx'
 import { ICONS, PlusIcon } from './Icons.jsx'
 import usePointerVars from '../hooks/usePointerVars.js'
+import usePageVisible from '../hooks/usePageVisible.js'
 import { CONTACT, INQUIRIES, SOCIALS } from '../data/content.js'
+
+/* The looping backdrop. Nothing downloads until the section is close to the
+   viewport, and it only decodes while it's on screen and the tab is showing —
+   so it never competes with the rest of the page. Visitors who ask for reduced
+   motion get the first frame, still. */
+function BackgroundVideo({ src }) {
+  const videoRef = useRef(null)
+  const pageVisible = usePageVisible()
+  const inView = useRef(false)
+
+  useEffect(() => {
+    const el = videoRef.current
+    if (!el) return
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    const sync = () => {
+      if (inView.current && pageVisible && !still) el.play().catch(() => {})
+      else el.pause()
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        inView.current = entry.isIntersecting
+        if (inView.current && el.preload === 'none') el.preload = 'auto'
+        sync()
+      },
+      // Starts a screen-edge early so it's already moving as it scrolls in.
+      { rootMargin: '300px 0px' }
+    )
+
+    observer.observe(el)
+    sync()
+    return () => observer.disconnect()
+  }, [pageVisible])
+
+  return (
+    <video
+      ref={videoRef}
+      className="talk__media"
+      src={src}
+      muted
+      loop
+      playsInline
+      preload="none"
+      disablePictureInPicture
+      aria-hidden="true"
+      tabIndex={-1}
+    />
+  )
+}
 
 /* mailto:/tel: links must stay in the same tab; everything else opens out. */
 function LinkRow({ item }) {
@@ -65,7 +116,7 @@ export default function Contact() {
   return (
     <section className="section" id="contacts" aria-label="Contacts">
       <div className="talk" ref={talkRef}>
-        <img className="talk__media" src="/images/contactsbg.jpg" alt="" decoding="async" />
+        <BackgroundVideo src="/videos/web%20video.mp4" />
         <div className="talk__scrim" aria-hidden="true" />
 
         <div className="shell talk__inner">

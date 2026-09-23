@@ -5,7 +5,7 @@
 
 export const BRAND = 'angelosky'
 export const COPYRIGHT = '© 2026 | angelosky'
-export const VERSION = 'version 3.1' // right end of the footer bar
+export const VERSION = 'version 3.2' // right end of the footer bar
 
 export const SECTIONS = [
   { id: 'home', label: 'Home' },
@@ -47,7 +47,9 @@ export const HERO = {
 
 /* Content for the Education / Experience pop-ups. Each panel has one heading
  * and a list of groups; a group's `title` is an optional bold sub-label above
- * its entries (leave it '' to run the entries straight under the heading). */
+ * its entries (leave it '' to run the entries straight under the heading).
+ * Give an entry a `details` list and its meta line becomes a dropdown that
+ * opens those lines as bullet points; leave it out for a plain entry. */
 export const PANELS = {
   education: {
     heading: 'Education',
@@ -82,9 +84,22 @@ export const PANELS = {
       {
         title: 'CREATIVE ROLES',
         items: [
-          { title: "CIT-U Computer Students' Society 26-Present", meta: 'Videographer | Editor' },
-          { title: 'TCSHS Oculus Multimedia Club 25-26', meta: 'Videographer | Editor' },
-          { title: 'TCSHS Supreme Student Learning Government: 24-26', meta: 'Layout Artist' },
+          {
+            title: "CIT-U Computer Students' Society 26-Present",
+            meta: 'Videographer | Editor',
+            details: [
+              'Documented school events and programs',
+              'Produce recap videos for the CCS department',
+            ],
+          },
+          {
+            title: 'TCSHS Oculus Multimedia Club 25-26',
+            meta: 'Videographer | Editor',
+            details: [
+              'Covered school events and programs',
+              'Participated in inter-school and regional competitions',
+            ],
+          },
         ],
       },
     ],
@@ -100,7 +115,7 @@ export const PROJECTS_HEAD = {
   badge: 'PAGE 02',
   title: 'PROJECTS',
   blurb: {
-    videos: "Everything I've shot, cut and colaborated on, all in one page.",
+    videos: "Not all, but few that I wanna showcase.",
     programs: 'New to coding, kinda nervous...',
   },
 }
