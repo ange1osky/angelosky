@@ -1900,8 +1900,19 @@ ul {
   margin-bottom: clamp(14px, 2.4vh, 22px);
 }
 
-.talk__block {
-  margin-top: clamp(30px, 5vh, 52px);
+.talk__lede {
+  max-width: 34ch;
+  margin-top: clamp(14px, 2.4vh, 24px);
+  font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.talk__groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(28px, 5vh, 44px) clamp(36px, 6vw, 84px);
+  margin-top: clamp(28px, 5vh, 48px);
 }
 
 /* Small caps label over each list, in the rail-label voice from Projects. */
@@ -1916,7 +1927,7 @@ ul {
 /* Framed like a project card (.frame), holding links instead of a thumbnail. */
 .talk__list {
   display: grid;
-  width: min(100%, 360px);
+  width: min(100%, 300px);
   margin-top: clamp(12px, 2vh, 18px);
   padding: 6px 0;
 }
@@ -1924,22 +1935,21 @@ ul {
 .talk__list--socials {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: clamp(20px, 3vw, 40px);
-  width: min(100%, 460px);
+  width: min(100%, 400px);
 }
 
 .talk__item {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px 2px;
+  padding: 11px 2px;
   font-size: clamp(0.9rem, 1.4vw, 1.02rem);
   color: rgba(255, 255, 255, 0.92);
-  transition: color 0.2s var(--ease), transform 0.2s var(--ease);
+  transition: color 0.2s var(--ease);
 }
 
 .talk__item:hover {
   color: var(--mint);
-  transform: translateX(4px);
 }
 
 .talk__item svg {
@@ -1948,106 +1958,18 @@ ul {
   height: 24px;
 }
 
-/* Decorative block composition, bled to the right edge of the section
-   (ShapeStack in Contact.jsx). It sits over the copy's layer so the blocks can
-   answer a hover — the copy never reaches this corner, and on phones the
-   section's bottom padding keeps it clear. */
-.talk__shapes {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
-  width: min(42vw, 460px);
-  height: clamp(300px, 62%, 500px);
-  pointer-events: none;
+/* Arrow sits dim at the end of the row and nudges up and out on hover. */
+.talk__item .talk__arrow {
+  width: 10px;
+  height: 10px;
+  margin-left: auto;
+  opacity: 0.4;
+  transition: transform 0.25s var(--ease), opacity 0.2s var(--ease);
 }
 
-/* Each block drifts against the pointer by its own --depth, the nearer ones
-   further, so the stack reads as layers in space rather than a flat sticker.
-   Sideways only: they all stand on the section floor, and lifting one would
-   open a gap beneath it. */
-.shape {
-  position: absolute;
-  pointer-events: auto;
-  translate: calc(var(--px, 0) * var(--depth, 0px) * -1) 0;
-  transition: translate 0.8s var(--ease);
-}
-
-/* The two back blocks each carry a hairline twin set off to the upper left,
-   like a print plate out of register. Hovering the stack pulls the plates
-   back into line, where the twin disappears into its own block's edge. */
-.shape--sky::after,
-.shape--frame::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 1px solid currentColor;
-  translate: -10px -10px;
-  pointer-events: none;
-  transition: translate 0.6s var(--ease);
-}
-
-.shape--sky {
-  --depth: 14px;
-
-  top: 0;
-  right: 0;
-  width: 52%;
-  height: 30%;
-  background: var(--mint);
-  color: var(--mint);
-}
-
-.shape--frame {
-  --depth: 22px;
-
-  top: 24%;
-  right: 0;
-  width: 84%;
-  height: 76%;
-  background: var(--coral);
-  color: var(--coral);
-}
-
-/* + marks on its top corners, ink on the coral behind. */
-.shape--cream {
-  --depth: 28px;
-  --mark-color: var(--ink);
-
-  top: 33%;
-  right: 17%;
-  width: 55%;
-  height: 67%;
-  background: var(--cream);
-}
-
-.shape--cream .mark {
-  transition: transform 0.4s var(--ease);
-}
-
-/* Nearest the viewer, so it drifts the most. */
-.shape--step {
-  --depth: 40px;
-
-  bottom: 0;
-  right: 86%;
-  width: 12%;
-  height: 33%;
-  background: var(--mint);
-}
-
-@media (hover: hover) {
-  .talk__shapes:hover .shape::after {
-    translate: 0 0;
-  }
-
-  .talk__shapes:hover .shape--cream .mark--tl {
-    transform: translate(-4px, -4px) rotate(90deg);
-  }
-
-  .talk__shapes:hover .shape--cream .mark--tr {
-    transform: translate(4px, -4px) rotate(90deg);
-  }
+.talk__item:hover .talk__arrow {
+  opacity: 1;
+  transform: translate(2px, -2px);
 }
 
 /* ===========================================================================
@@ -2349,15 +2271,6 @@ ul {
 
   .talk {
     min-height: 0;
-    /* Keep the copy clear of the shape stack once it sits under the text —
-       its full height, plus room for the offset outlines that stand 10px
-       proud of it, plus a gap. */
-    padding-bottom: calc(clamp(190px, 30vh, 280px) + 36px);
-  }
-
-  .talk__shapes {
-    width: min(58vw, 250px);
-    height: clamp(190px, 30vh, 270px);
   }
 }
 

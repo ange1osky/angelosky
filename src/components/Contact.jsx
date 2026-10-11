@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react'
 import FooterBar from './FooterBar.jsx'
 import CornerMarks from './CornerMarks.jsx'
-import { ICONS, PlusIcon } from './Icons.jsx'
-import usePointerVars from '../hooks/usePointerVars.js'
+import { ICONS, ArrowUpRightIcon } from './Icons.jsx'
 import usePageVisible from '../hooks/usePageVisible.js'
 import { CONTACT, INQUIRIES, SOCIALS } from '../data/content.js'
 
@@ -70,6 +69,7 @@ function LinkRow({ item }) {
     >
       {Icon && <Icon />}
       {item.label}
+      <ArrowUpRightIcon className="talk__arrow" />
     </a>
   )
 }
@@ -90,32 +90,11 @@ function LinkBlock({ label, items, wide = false }) {
   )
 }
 
-/* The block composition. Purely decorative: each block sits at its own depth
-   and drifts against the pointer, and hovering the stack pulls the offset
-   outlines into line. */
-function ShapeStack() {
-  return (
-    <div className="talk__shapes" aria-hidden="true">
-      <span className="shape shape--sky" />
-      <span className="shape shape--frame" />
-      <span className="shape shape--cream">
-        <PlusIcon className="mark mark--tl" />
-        <PlusIcon className="mark mark--tr" />
-      </span>
-      <span className="shape shape--step" />
-    </div>
-  )
-}
-
 export default function Contact() {
-  // The whole page is the stage: the blocks answer the pointer from anywhere
-  // on it, not just when it's over them.
-  const talkRef = useRef(null)
-  usePointerVars(talkRef)
 
   return (
     <section className="section" id="contacts" aria-label="Contacts">
-      <div className="talk" ref={talkRef}>
+      <div className="talk">
         <BackgroundVideo src="/videos/web%20video.mp4" />
         <div className="talk__scrim" aria-hidden="true" />
 
@@ -126,11 +105,14 @@ export default function Contact() {
             <span className="talk__title-accent">{CONTACT.titleAccent}</span>
           </h2>
 
-          <LinkBlock label={CONTACT.inquiriesLabel} items={INQUIRIES} />
-          <LinkBlock label={CONTACT.followLabel} items={SOCIALS} wide />
+          <p className="talk__lede">{CONTACT.lede}</p>
+
+          <div className="talk__groups">
+            <LinkBlock label={CONTACT.inquiriesLabel} items={INQUIRIES} />
+            <LinkBlock label={CONTACT.followLabel} items={SOCIALS} wide />
+          </div>
         </div>
 
-        <ShapeStack />
       </div>
 
       <FooterBar tone="light" />

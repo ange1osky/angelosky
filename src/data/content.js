@@ -201,11 +201,12 @@ export const CONTACT = {
   title: 'THE NEXT STEP',
   titleAccent: 'AWAITS',
   page: 'PAGE 03',
-  inquiriesLabel: 'For inquires, catch me through:',
+  lede: 'Got a project, a collab, or just want to say hi? My inbox is open.',
+  inquiriesLabel: 'For inquiries, catch me through:',
   followLabel: 'My other socials:',
 }
 
-/* Rows under "For inquires". `id` picks the icon from ICONS in Icons.jsx —
+/* Rows under "For inquiries". `id` picks the icon from ICONS in Icons.jsx —
  * available: facebook, messenger, mail, instagram, tiktok, github.
  * To put the email back, add:
  *   { id: 'mail', label: 'balaneangelo02@gmail.com', href: 'mailto:balaneangelo02@gmail.com' } */
