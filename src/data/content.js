@@ -125,6 +125,7 @@ export const PROJECTS_HEAD = {
  * `poster` — the thumbnail in `public/images/thumbs/`, shown before playback
  *            and again as the <video> poster while the first frame decodes. */
 export const VIDEOS = [
+  { id: 'v22', title: 'Bisaya Music Festival 2026', award: '', roles: 'Videographer | Editor', src: '/videos/22.mp4', poster: '/images/thumbs/22.png' },
   { id: 'v21', title: 'CIT-U: CCS Acquaintance Party 2026', award: '', roles: 'Videographer | Editor', src: '/videos/21.mp4', poster: '/images/thumbs/21.png' },
   { id: 'v20', title: 'Cebu Oceanpark', award: '', roles: 'Personal Project', src: '/videos/20.mp4', poster: '/images/thumbs/20.png' },
   { id: 'v19', title: 'CIT-U: Brand New Day', award: '', roles: 'Personal Project', src: '/videos/19.mp4', poster: '/images/thumbs/19.png' },
@@ -159,7 +160,7 @@ export const PROGRAMS = [
     category: 'Game Dev',
     award: 'Top 38% out of 10,000+ entries - Top 19% in Art Category',
     roles: 'Artist',
-    href: 'https://boys-at-the-back.itch.io/goblin-alarm',
+    href: 'https://goblinalarm.vercel.app',
     image: '/images/titlebg.webp',
   },
 ]
