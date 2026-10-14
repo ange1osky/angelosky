@@ -7,6 +7,7 @@ import Intro from './components/Intro.jsx'
 import useHashRoute from './hooks/useHashRoute.js'
 import useInteractionSfx from './hooks/useInteractionSfx.js'
 import { SECTIONS } from './data/content.js'
+import { markRevealed } from './motion/reveal.js'
 
 const PAGES = { home: Home, projects: Projects, contacts: Contact }
 const ROUTES = SECTIONS.map((s) => s.id)
@@ -32,7 +33,11 @@ export default function App() {
     <>
       {!introDone && (
         <Intro
-          onEnter={() => setArriving(true)}
+          onEnter={() => {
+            setArriving(true)
+            // Lets the page's entrance animations start as the cells clear.
+            markRevealed()
+          }}
           onDone={() => {
             sessionStorage.setItem('intro-seen', '1')
             setIntroDone(true)

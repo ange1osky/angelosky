@@ -1,9 +1,22 @@
 import { useEffect, useRef } from 'react'
+import { entrance, stagger, useEntrance } from '../motion/motion.js'
+
+/* Once the panel has popped in, its entries settle in one after another. */
+function panelEntrance(root) {
+  const run = entrance(root, { delay: 140 })
+  run.add(
+    root.querySelectorAll('.modal__group-title, .modal__entry'),
+    { y: [10, 0], opacity: [0, 1], duration: 500, delay: stagger(45) },
+    0
+  )
+  return run
+}
 
 /* Pop-up used by the Education / Experience buttons: one or more headed groups
    of entries. Closes on the ×, Escape, or a click on the backdrop. */
 export default function Modal({ panel, onClose }) {
   const closeRef = useRef(null)
+  const panelRef = useEntrance(panelEntrance)
 
   useEffect(() => {
     closeRef.current?.focus()
@@ -32,7 +45,7 @@ export default function Modal({ panel, onClose }) {
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="modal__panel">
+      <div className="modal__panel" ref={panelRef}>
         <button ref={closeRef} className="modal__close" onClick={onClose} aria-label="Close">
           ✕
         </button>

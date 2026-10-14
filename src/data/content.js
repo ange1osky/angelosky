@@ -5,7 +5,7 @@
 
 export const BRAND = 'angelosky'
 export const COPYRIGHT = '© 2026 | angelosky'
-export const VERSION = 'version 3.2' // right end of the footer bar
+export const VERSION = 'version 3.4' // right end of the footer bar
 
 export const SECTIONS = [
   { id: 'home', label: 'Home' },
@@ -115,7 +115,7 @@ export const PROJECTS_HEAD = {
   badge: 'PAGE 02',
   title: 'PROJECTS',
   blurb: {
-    videos: "Not all, but few that I wanna showcase.",
+    videos: "Here's some of my best works.",
     programs: 'New to coding, kinda nervous...',
   },
 }
@@ -201,7 +201,7 @@ export const CONTACT = {
   title: 'THE NEXT STEP',
   titleAccent: 'AWAITS',
   page: 'PAGE 03',
-  lede: 'Got a project, a collab, or just want to say hi? My inbox is open.',
+  lede: 'Im down for collabs and projects, depending on the scope and schedule. Feel free to reach out!',
   inquiriesLabel: 'For inquiries, catch me through:',
   followLabel: 'My other socials:',
 }

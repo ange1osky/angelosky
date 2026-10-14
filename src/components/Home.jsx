@@ -4,13 +4,69 @@ import Modal from './Modal.jsx'
 import CornerMarks, { LineMarks } from './CornerMarks.jsx'
 import Crosshair from './Crosshair.jsx'
 import { HERO, PANELS } from '../data/content.js'
+import {
+  decode,
+  entrance,
+  marksIn,
+  riseChars,
+  riseLines,
+  slideIn,
+  stagger,
+  useEntrance,
+} from '../motion/motion.js'
+
+/* The hero opens like a title sequence: the plate settles, the greeting steps
+   in, PORTFOLIO rises letter by letter, and the year ticks over like the
+   intro's counter before landing on 2026. */
+function heroEntrance(root) {
+  const run = entrance(root, { delay: 380 })
+  const q = (s) => root.querySelector(s)
+
+  run.add(q('.hero__media'), { scale: [1.08, 1], duration: 2400 }, 0)
+  slideIn(run, q('.page-chip'), 0)
+  slideIn(run, q('.hero__kicker'), 120)
+  riseChars(run, q('.hero__title'), 120)
+  run.add(
+    root.querySelectorAll('.hero__tagline > span'),
+    { y: ['0.7em', '0em'], opacity: [0, 1], duration: 800, delay: stagger(110) },
+    700
+  )
+  decode(run, q('.hero__year'), 450, { chars: 'numbers', from: 'right', revealRate: 10 })
+  run.add(q('.hero__edition'), { opacity: [0, 1], duration: 900 }, 1050)
+
+  return run
+}
+
+/* The about band plays when it scrolls into view rather than under the hero. */
+function aboutEntrance(root) {
+  const run = entrance(root, { delay: 0, scroll: true })
+  const q = (s) => root.querySelector(s)
+
+  riseChars(run, q('.about__title'), 0, { from: 'first', each: 35 })
+  riseLines(run, root.querySelectorAll('.about__body'), 250)
+  run.add(
+    root.querySelectorAll('.about__actions .pill'),
+    { y: [14, 0], opacity: [0, 1], delay: stagger(90) },
+    650
+  )
+  marksIn(run, root.querySelectorAll('.about__actions .mark'), 800)
+
+  // The viewfinder closes in on the portrait, as the intro frame does on 100%.
+  run.add(q('.about__frame'), { scale: [1.12, 1], opacity: [0, 1], duration: 1000 }, 100)
+  marksIn(run, root.querySelectorAll('.about__frame .mark'), 500)
+  run.add(q('.about__photo'), { y: ['10%', '0%'], opacity: [0, 1], duration: 1200 }, 200)
+
+  return run
+}
 
 export default function Home() {
   const [openPanel, setOpenPanel] = useState(null)
+  const heroRef = useEntrance(heroEntrance)
+  const aboutRef = useEntrance(aboutEntrance)
 
   return (
     <section className="section" id="home" aria-label="Portfolio">
-      <div className="hero">
+      <div className="hero" ref={heroRef}>
         <img
           className="hero__media"
           src="/images/bg.jpg"
@@ -51,7 +107,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="about">
+      <div className="about" ref={aboutRef}>
         <LineMarks edge="top" split />
 
         <div className="about__copy">

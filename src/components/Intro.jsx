@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { animate, createScope, createTimeline } from 'animejs'
 import { setMusicEnabled } from '../hooks/useMusicPref.js'
-import { PlusIcon } from './Icons.jsx'
 
 // Sound played on enter. Drop your clip at public/audio/intro.wav (restart the
 // dev server after adding it — Vite ignores public/). If it's missing, the
@@ -8,105 +8,17 @@ import { PlusIcon } from './Icons.jsx'
 const SFX_SRC = '/audio/intro.wav'
 const SFX_VOLUME = 0.6
 
-/* Counter pacing. A quick run to 25% while the frame slides in from the edges,
-   then climbs with short holds at 78 and 95 so it reads as work being done
-   rather than a timer. The count parks at 99 until the window has actually
-   loaded, so 100% always means the page behind it is ready. */
-const LEAD = 0.4
-const START = 25
-const CLIMB = 1.2
-const STOPS = [
-  { at: 78, hold: 0.5 },
-  { at: 95, hold: 0.5 },
-]
+/* Counter pacing. A quick run to 25%, then climbs with short holds at 78 and
+   95 so it reads as work being done rather than a timer. The count parks at
+   99 until the window has actually loaded, so 100% always means the page
+   behind it is ready. */
 const LOAD_TIMEOUT = 6000
-
-// Half the final box round the count, in px.
-const BOX = 72
 
 // Exit: the panel breaks into cells that clear outward from the centre.
 const CELL = 36
 const DISSOLVE_MS = 1300
 
-/* The frame runs as Web Animations so the compositor plays it — smooth even
-   while the site mounts underneath and the main thread is busy. That means
-   CSS easing strings; these are the quadratic ease-out / ease-in-out. */
-const EASE_OUT = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-const EASE_IN_OUT = 'cubic-bezier(0.455, 0.03, 0.515, 0.955)'
 const easeOut = (t) => 1 - (1 - t) * (1 - t)
-
-/* Each climb as { start, end, from, to, ease } in seconds from the start.
-   A stop's hold is the gap before the next climb starts. */
-const SCHEDULE = (() => {
-  const points = [START, ...STOPS.map((s) => s.at), 100]
-  const out = []
-  let t = LEAD
-  for (let i = 0; i < points.length - 1; i += 1) {
-    const from = points[i]
-    const to = points[i + 1]
-    const dur = Math.max(((to - from) / (100 - START)) * CLIMB, 0.35)
-    out.push({ start: t, end: t + dur, from, to, ease: i === 0 ? EASE_OUT : EASE_IN_OUT })
-    t += dur + (STOPS[i]?.hold ?? 0)
-  }
-  return out
-})()
-
-const TOTAL = SCHEDULE[SCHEDULE.length - 1].end
-
-// How far the frame has closed in, 0 at the edges to 1 boxed round the count.
-const closure = (value) => Math.max(0, (value - START) / (100 - START))
-
-/* The frame's path as keyframe stops: { t, enter, z, ease }. `enter` slides
-   the lines in from just off-screen, `z` closes them on the centre; a hold
-   repeats the stop it pauses on. `ease` shapes the run to the next stop. */
-const FRAME_STOPS = (() => {
-  const out = [{ t: 0, enter: 0, z: 0, ease: EASE_OUT }]
-  let at = { t: LEAD, enter: 1, z: 0 }
-  for (const seg of SCHEDULE) {
-    if (seg.start > at.t) {
-      out.push({ ...at, ease: 'linear' })
-      at = { ...at, t: seg.start }
-    }
-    out.push({ ...at, ease: seg.ease })
-    at = { t: seg.end, enter: 1, z: closure(seg.to) }
-  }
-  out.push({ ...at, ease: 'linear' })
-  return out
-})()
-
-/* Each piece of the frame, keyed by its data-place. `x` is how far the left
-   line has travelled and `y` the top line; the far lines mirror them, and a
-   corner mark rides both lines that meet at it. */
-const PLACES = {
-  left: (x) => `translate3d(${x}px, 0, 0)`,
-  right: (x) => `translate3d(${-x}px, 0, 0)`,
-  top: (x, y) => `translate3d(0, ${y}px, 0)`,
-  bottom: (x, y) => `translate3d(0, ${-y}px, 0)`,
-  tl: (x, y) => `translate3d(${x}px, ${y}px, 0)`,
-  tr: (x, y) => `translate3d(${-x}px, ${y}px, 0)`,
-  bl: (x, y) => `translate3d(${x}px, ${-y}px, 0)`,
-  br: (x, y) => `translate3d(${-x}px, ${-y}px, 0)`,
-}
-
-// Overlay size and the CSS inset the lines start from (it tightens on phones).
-function measure(root) {
-  const { width: w, height: h } = root.getBoundingClientRect()
-  const line = root.querySelector('[data-place="left"]')
-  const inset = parseFloat(getComputedStyle(line).left) || 32
-  const box = Math.min(BOX, w / 2 - inset - 12, h / 2 - inset - 12)
-  return { w, h, inset, box }
-}
-
-function keyframes(place, g) {
-  const at = PLACES[place]
-  return FRAME_STOPS.map((s) => {
-    // Starts far enough out that the corner marks' arms are off-screen too.
-    const slide = (g.inset + 12) * (s.enter - 1)
-    const x = slide + (g.w / 2 - g.box - g.inset) * s.z
-    const y = slide + (g.h / 2 - g.box - g.inset) * s.z
-    return { offset: s.t / TOTAL, easing: s.ease, transform: at(x, y) }
-  })
-}
 
 function reducedMotion() {
   return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -182,7 +94,6 @@ function prepareDissolve(canvas, root, color) {
 export default function Intro({ onDone, onEnter }) {
   const [ready, setReady] = useState(false)
   const rootRef = useRef(null)
-  const percentRef = useRef(null)
   const canvasRef = useRef(null)
   const sfxRef = useRef(null)
   const playDissolve = useRef(null)
@@ -197,87 +108,104 @@ export default function Intro({ onDone, onEnter }) {
     sfxRef.current = sfx
   }, [])
 
-  /* The frame plays on the compositor; the only per-frame main-thread work
-     left is the counter, and it touches the DOM only when the number changes. */
+  /* A coral square on black, turning a quarter at a time while the count
+     inside it climbs. At 100% it folds away and Enter takes its place. */
   useEffect(() => {
     const root = rootRef.current
-    const percent = percentRef.current
-    if (!root || !percent) return
+    if (!root) return undefined
 
-    const pieces = [...root.querySelectorAll('[data-place]')]
-    const g = measure(root)
-    const anims = pieces.map((el) =>
-      el.animate(keyframes(el.dataset.place, g), { duration: TOTAL * 1000, fill: 'both' })
-    )
-
-    // A resize mid-run re-aims the frame without restarting it.
-    const onResize = () => {
-      const next = measure(root)
-      anims.forEach((a, i) => a.effect.setKeyframes(keyframes(pieces[i].dataset.place, next)))
-    }
-    window.addEventListener('resize', onResize)
-
-    if (reducedMotion()) {
-      anims.forEach((a) => a.finish())
-      percent.textContent = '100%'
-      setReady(true)
-      return () => {
-        window.removeEventListener('resize', onResize)
-        anims.forEach((a) => a.cancel())
-      }
-    }
+    const square = root.querySelector('.intro__square')
+    const percent = root.querySelector('.intro__percent')
 
     let loaded = document.readyState === 'complete'
+    const waiters = []
     const markLoaded = () => {
       loaded = true
+      waiters.splice(0).forEach((fn) => fn())
     }
     window.addEventListener('load', markLoaded)
     const cap = window.setTimeout(markLoaded, LOAD_TIMEOUT)
 
-    let shown = -1
-    let raf = 0
-    const frame = () => {
-      // Read the clock off the frame's own animation so the two never drift.
-      const t = (anims[0]?.currentTime ?? 0) / 1000
-
-      let value = START * Math.min(1, t / LEAD)
-      if (t >= LEAD) {
-        let seg = SCHEDULE[0]
-        for (const s of SCHEDULE) if (s.start <= t) seg = s
-        const p = Math.min(1, (t - seg.start) / (seg.end - seg.start))
-        value = seg.from + (seg.to - seg.from) * p
-      }
-
-      const n = Math.min(Math.round(value), loaded ? 100 : 99)
-      if (n !== shown) {
+    const scope = createScope({ root }).add(() => {
+      // Touches the DOM only when the whole number changes.
+      let shown = -1
+      const render = (v) => {
+        const n = Math.floor(v)
+        if (n === shown) return
         shown = n
         percent.textContent = `${n}%`
       }
 
-      if (t >= TOTAL && loaded) {
+      if (reducedMotion()) {
+        render(100)
         setReady(true)
         return
       }
-      raf = requestAnimationFrame(frame)
-    }
-    raf = requestAnimationFrame(frame)
+
+      // Grows out of the centre, then turns a quarter at a time — only the
+      // square turns, so the number inside stays level and readable.
+      animate(square, { scale: [0, 1], duration: 700, ease: 'out(4)', delay: 150 })
+      // Dark ink, so it waits for the square behind it rather than ghosting
+      // on the black.
+      animate(percent, { opacity: [0, 1], duration: 300, delay: 450 })
+      const turn = animate(square, {
+        rotate: [0, 90],
+        duration: 1300,
+        ease: 'inOutExpo',
+        loop: true,
+        loopDelay: 260,
+        delay: 400,
+      })
+
+      const count = { v: 0 }
+      createTimeline({
+        defaults: { ease: 'inOut(2)' },
+        onUpdate: () => render(count.v),
+        onComplete: () => {
+          const finish = () =>
+            animate(count, {
+              v: 100,
+              duration: 260,
+              ease: 'out(2)',
+              onUpdate: () => render(count.v),
+              onComplete: () => {
+                turn.pause()
+                // In JS, not CSS: the fade-in above left an inline opacity
+                // the stylesheet can't override.
+                animate(percent, { opacity: 0, duration: 200, ease: 'linear' })
+                animate(square, {
+                  rotate: '+=45',
+                  scale: 0,
+                  duration: 520,
+                  ease: 'inBack(1.6)',
+                })
+                setReady(true)
+              },
+            })
+          if (loaded) finish()
+          else waiters.push(finish)
+        },
+      })
+        .add(count, { v: 25, duration: 400, ease: 'out(2)' })
+        .add(count, { v: 78, duration: 850 })
+        .add(count, { v: 95, duration: 350 }, '+=500')
+        .add(count, { v: 99, duration: 350 }, '+=500')
+    })
 
     return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener('resize', onResize)
+      scope.revert()
       window.removeEventListener('load', markLoaded)
       window.clearTimeout(cap)
-      anims.forEach((a) => a.cancel())
     }
   }, [])
 
   /* Once the count lands, cut the exit grid in the idle moment before the
      click — and again if the window changes size while Enter waits. */
   useEffect(() => {
-    if (!ready || reducedMotion()) return
+    if (!ready || reducedMotion()) return undefined
     const root = rootRef.current
     const canvas = canvasRef.current
-    if (!root || !canvas) return
+    if (!root || !canvas) return undefined
 
     const prepare = () => {
       const color = getComputedStyle(root).getPropertyValue('--intro-bg').trim() || '#1c1c1c'
@@ -338,22 +266,8 @@ export default function Intro({ onDone, onEnter }) {
       }}
     >
       <div className="intro__chrome" aria-hidden="true">
-        <span className="intro__line intro__line--left" data-place="left" />
-        <span className="intro__line intro__line--right" data-place="right" />
-        <span className="intro__line intro__line--top" data-place="top" />
-        <span className="intro__line intro__line--bottom" data-place="bottom" />
-
-        {['tl', 'tr', 'bl', 'br'].map((corner) => (
-          <PlusIcon
-            key={corner}
-            className={`intro__plus intro__plus--${corner}`}
-            data-place={corner}
-          />
-        ))}
-
-        <span ref={percentRef} className="intro__percent">
-          0%
-        </span>
+        <span className="intro__square" />
+        <span className="intro__percent">0%</span>
         <span className="intro__enter">Enter</span>
       </div>
 

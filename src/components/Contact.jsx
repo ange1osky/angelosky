@@ -4,6 +4,7 @@ import CornerMarks from './CornerMarks.jsx'
 import { ICONS, ArrowUpRightIcon } from './Icons.jsx'
 import usePageVisible from '../hooks/usePageVisible.js'
 import { CONTACT, INQUIRIES, SOCIALS } from '../data/content.js'
+import { entrance, marksIn, riseChars, slideIn, stagger, useEntrance } from '../motion/motion.js'
 
 /* The looping backdrop. Nothing downloads until the section is close to the
    viewport, and it only decodes while it's on screen and the tab is showing —
@@ -90,7 +91,30 @@ function LinkBlock({ label, items, wide = false }) {
   )
 }
 
+/* Chip steps in, the title rises, then each list traces in: its corner marks
+   turn into place and the links step across one after another. */
+function talkEntrance(root) {
+  const run = entrance(root)
+  const q = (s) => root.querySelector(s)
+
+  slideIn(run, q('.page-chip'), 0)
+  riseChars(run, q('.talk__title'), 80, { from: 'first', each: 32 })
+  run.add(q('.talk__lede'), { y: [14, 0], opacity: [0, 1], duration: 800 }, 550)
+  root.querySelectorAll('.talk__block').forEach((block, i) => {
+    const at = 700 + i * 180
+    slideIn(run, block.querySelector('.talk__label'), at)
+    marksIn(run, block.querySelectorAll('.talk__list > .mark'), at + 80)
+    run.add(
+      block.querySelectorAll('.talk__item'),
+      { x: [-14, 0], opacity: [0, 1], duration: 600, delay: stagger(55) },
+      at + 120
+    )
+  })
+  return run
+}
+
 export default function Contact() {
+  const innerRef = useEntrance(talkEntrance)
 
   return (
     <section className="section" id="contacts" aria-label="Contacts">
@@ -98,7 +122,7 @@ export default function Contact() {
         <BackgroundVideo src="/videos/web%20video.mp4" />
         <div className="talk__scrim" aria-hidden="true" />
 
-        <div className="shell talk__inner">
+        <div className="shell talk__inner" ref={innerRef}>
           <span className="page-chip talk__chip">{CONTACT.page}</span>
           <h2 className="display talk__title">
             {CONTACT.title}{' '}
