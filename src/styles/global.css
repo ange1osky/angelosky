@@ -17,7 +17,25 @@
   --ink-3: #1c1c1c;
   --ink-4: #232323;
 
-  --hairline: rgba(255, 255, 255, 0.1);
+  /* Theme: the page ground, the type on it, and a raised surface. The
+     -rgb twins feed the translucent rgba() greys and glass. Light values
+     are in [data-theme='light'] below. */
+  --bg: var(--ink);
+  --bg-rgb: 13, 13, 13;
+  --fg: #fff;
+  --fg-rgb: 255, 255, 255;
+  --surface-2: var(--ink-4);
+  --footer-ink: var(--cream);
+
+  /* The About band: a raised dark panel in dark mode, cream in light. */
+  --about-bg: #161616;
+  --about-ink: #fff;
+  --about-body: rgba(255, 255, 255, 0.78);
+  --about-teal: var(--mint);
+  --about-coral: var(--coral);
+  --about-pill: #262626;
+
+  --hairline: rgba(var(--fg-rgb), 0.1);
 
   --nav-h: 72px;
   --maxw: 1240px;
@@ -33,13 +51,50 @@
 
   /* Quiet greys for labels and hairline rules. */
   --grey: #80828c;
-  --rule: rgba(255, 255, 255, 0.08);
+  --rule: rgba(var(--fg-rgb), 0.08);
 
   /* Where the two full-height page lines stand, in from each edge. Shared by
      the lines themselves and every + mark that sits on them. */
   --line-x: max(10px, calc(var(--gutter) - 22px));
 
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  /* Neutral greys, no warm cast — a tint here turns olive wherever it mixes
+     with dark (the nav glass, browser auto-dark modes). */
+  --bg: #f2f2f2;
+  --bg-rgb: 242, 242, 242;
+  --fg: #0d0d0d;
+  --fg-rgb: 13, 13, 13;
+  --surface-2: #e8e8e8;
+  --footer-ink: var(--ink);
+  --about-bg: var(--cream);
+  --about-ink: var(--ink);
+  --about-body: #2a2a2a;
+  --about-teal: var(--teal-ink);
+  --about-coral: var(--coral-deep);
+  --about-pill: var(--ink-3);
+  --grey: #676973;
+
+  /* `only` opts out of browser auto-dark (Chrome's forced dark, and
+     extensions that honour it), so light mode shows as designed. */
+  color-scheme: only light;
+}
+
+/* Bands that sit on photos or video keep white type in either theme. */
+.hero,
+.talk,
+.card__frame {
+  --fg: #fff;
+  --fg-rgb: 255, 255, 255;
+}
+
+.hero,
+.talk {
+  color: var(--fg);
 }
 
 /* --- Reset --------------------------------------------------------------- */
@@ -56,8 +111,8 @@ html {
 
 body {
   margin: 0;
-  background: var(--ink);
-  color: #fff;
+  background: var(--bg);
+  color: var(--fg);
   font-family: var(--font);
   font-weight: 400;
   line-height: 1.6;
@@ -173,73 +228,26 @@ ul {
   }
 }
 
-/* First-load preloader. Plain black, and in the middle a coral square turning
-   a quarter at a time while the count inside it climbs. At 100% the square
-   folds away and Enter takes its place. Intro.jsx drives it with anime.js. */
+/* First-load gate: plain black with Enter in the middle. On click the same
+   mint and coral bars as the page wipe sweep across, and the black clears
+   while they cover the screen. */
 .intro {
-  --intro-bg: #000;
-  --intro-ink: #fff;
-
   position: fixed;
   inset: 0;
   z-index: 300;
   overflow: hidden;
   contain: strict;
-  background: var(--intro-bg);
-  color: var(--intro-ink);
-  cursor: progress;
+  background: #000;
+  color: #fff;
+  cursor: pointer;
   outline: none;
 }
 
-.intro[data-ready='true'] {
-  cursor: pointer;
-}
-
-.intro__chrome {
-  position: absolute;
-  inset: 0;
-}
-
-/* Square and number share the centre; only the square turns, so the count
-   stays level. */
-.intro__square,
-.intro__percent,
+/* Title-card lettering: light Poppins capitals set very wide. */
 .intro__enter {
   position: absolute;
   top: 50%;
   left: 50%;
-}
-
-.intro__square {
-  --size: clamp(96px, 16vmin, 150px);
-
-  width: var(--size);
-  height: var(--size);
-  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
-  border-radius: 14%;
-  background: var(--coral);
-  transform: scale(0);
-  will-change: transform;
-}
-
-.intro__percent {
-  transform: translate(-50%, -50%);
-  color: var(--ink);
-  font-size: clamp(1rem, 2.6vmin, 1.4rem);
-  font-weight: 600;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  transition: opacity 0.2s linear;
-}
-
-.intro[data-ready='true'] .intro__percent {
-  opacity: 0;
-}
-
-/* Title-card lettering: light Poppins capitals set very wide, the way film
-   titles and trailer cards are. */
-.intro__enter {
   transform: translate(-50%, -50%);
   font-size: 1.2rem;
   font-weight: 300;
@@ -249,37 +257,8 @@ ul {
   padding-left: 0.42em;
   text-transform: uppercase;
   white-space: nowrap;
-  opacity: 0;
   pointer-events: none;
-}
-
-/* Tracks in like an opening title — the letters draw together out of a soft
-   blur — once the square has folded away, then breathes slowly to invite the
-   click. The first pulse starts from full, so the hand-off never blinks. */
-.intro[data-ready='true'] .intro__enter {
-  animation:
-    intro-title 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.35s backwards,
-    intro-pulse 2.4s ease-in-out 1.8s infinite;
-  opacity: 1;
-}
-
-@keyframes intro-title {
-  from {
-    opacity: 0;
-    letter-spacing: 0.66em;
-    padding-left: 0.66em;
-    filter: blur(6px);
-  }
-}
-
-@keyframes intro-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.45;
-  }
+  animation: page-in 0.6s linear both;
 }
 
 .intro:focus-visible .intro__enter {
@@ -287,30 +266,49 @@ ul {
   text-underline-offset: 6px;
 }
 
-/* On enter, the canvas takes over with an identical fill and the panel goes
-   clear behind it; the canvas then breaks up to reveal the site. */
-.intro__canvas {
+.intro__bar {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
-  /* Drawn at one pixel per CSS pixel; scale it up hard-edged on hi-DPI
-     screens rather than smoothing the cell edges into a blur. */
-  image-rendering: pixelated;
+  transform: translateX(-100%);
+  will-change: transform;
+}
+
+.intro__bar--mint {
+  background: var(--mint);
+}
+
+.intro__bar--coral {
+  background: var(--coral);
 }
 
 .intro[data-state='exit'] {
-  background: transparent;
   pointer-events: none;
+  /* Black and Enter drop out at the moment the bars cover (COVER_MS). */
+  animation: intro-clear 0s linear 0.36s forwards;
 }
 
-.intro[data-state='exit'] .intro__chrome {
-  display: none;
+.intro[data-state='exit'] .intro__enter {
+  animation: intro-hide 0s linear 0.36s forwards;
 }
 
-.intro[data-state='exit'] .intro__canvas {
-  display: block;
+.intro[data-state='exit'] .intro__bar {
+  animation: wipe-sweep 0.72s cubic-bezier(0.66, 0, 0.28, 1) forwards;
+}
+
+.intro[data-state='exit'] .intro__bar--coral {
+  animation-delay: 0.09s;
+}
+
+@keyframes intro-clear {
+  to {
+    background: transparent;
+  }
+}
+
+@keyframes intro-hide {
+  to {
+    opacity: 0;
+  }
 }
 
 /* The site pulling into place behind the lifting overlay: it starts slightly
@@ -413,7 +411,7 @@ ul {
   position: absolute;
   width: 9px;
   height: 9px;
-  color: var(--mark-color, rgba(255, 255, 255, 0.4));
+  color: var(--mark-color, rgba(var(--fg-rgb), 0.4));
   pointer-events: none;
   transition: transform 0.28s var(--ease);
 }
@@ -574,14 +572,14 @@ ul {
 .crosshair__h {
   right: 0;
   height: 1px;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(var(--fg-rgb), 0.5);
   transform: translate3d(0, var(--cy, 0px), 0);
 }
 
 .crosshair__v {
   bottom: 0;
   width: 1px;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(var(--fg-rgb), 0.5);
   transform: translate3d(var(--cx, 0px), 0, 0);
 }
 
@@ -614,12 +612,12 @@ ul {
   background:
     repeating-linear-gradient(
       -45deg,
-      rgba(255, 255, 255, 0.05) 0 1px,
+      rgba(var(--fg-rgb), 0.05) 0 1px,
       transparent 1px 11px
     ),
-    rgba(255, 255, 255, 0.07);
-  border: 1px dashed rgba(255, 255, 255, 0.22);
-  color: rgba(255, 255, 255, 0.5);
+    rgba(var(--fg-rgb), 0.07);
+  border: 1px dashed rgba(var(--fg-rgb), 0.22);
+  color: rgba(var(--fg-rgb), 0.5);
   font-size: 0.7rem;
   font-weight: 500;
   letter-spacing: 0.18em;
@@ -636,7 +634,7 @@ ul {
   height: var(--nav-h);
   display: flex;
   align-items: center;
-  background: rgba(13, 13, 13, 0.55);
+  background: rgba(var(--bg-rgb), 0.55);
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   border-bottom: 1px solid transparent;
@@ -644,7 +642,7 @@ ul {
 }
 
 .nav--scrolled {
-  background: rgba(13, 13, 13, 0.86);
+  background: rgba(var(--bg-rgb), 0.86);
   border-bottom-color: var(--hairline);
 }
 
@@ -666,7 +664,7 @@ ul {
   font-size: clamp(0.9rem, 1.6vw, 1.05rem);
   font-weight: 400;
   letter-spacing: 0.01em;
-  color: #fff;
+  color: var(--fg);
   transition: opacity 0.2s var(--ease);
 }
 
@@ -674,41 +672,36 @@ ul {
   opacity: 0.7;
 }
 
-/* --- Music toggle -------------------------------------------------------- */
+/* --- Theme toggle -------------------------------------------------------- */
 
-/* Coral for playing — it already means "active" everywhere else on the site,
-   and warm reads as sound. Blue for off, picked cool and a touch desaturated so
-   the two states differ in hue rather than just brightness; a colourblind
-   visitor still gets the knob position as a second signal. */
-.music {
-  --music-off: #4aa8e0;
-  --music-on: var(--coral);
+/* Blue for dark, coral for light. The knob shows the mode a press switches to
+   — a sun in dark, a moon in light. The states differ in hue, icon and knob
+   position, so none of them carries the meaning alone. */
+.theme {
+  --theme-dark: #4aa8e0;
+  --theme-light: var(--coral);
 
   display: inline-flex;
   align-items: center;
-  gap: 10px;
   padding: 0;
   border-radius: 99px;
 }
 
-.music__switch {
+.theme__switch {
   position: relative;
   flex: none;
   width: 46px;
   height: 26px;
   border-radius: 99px;
-  background: var(--music-off);
-  transition: background 0.32s var(--ease), box-shadow 0.32s var(--ease);
+  background: var(--theme-dark);
+  transition: background 0.32s var(--ease);
 }
 
-.music[data-playing='true'] .music__switch {
-  background: var(--music-on);
-  /* Just enough bloom to catch the eye when it flips, without becoming a
-     second focus ring next to the real one. */
-  box-shadow: 0 0 0 1px rgba(253, 110, 96, 0.4), 0 2px 12px rgba(253, 110, 96, 0.34);
+.theme[data-light='true'] .theme__switch {
+  background: var(--theme-light);
 }
 
-.music__knob {
+.theme__knob {
   position: absolute;
   top: 3px;
   left: 3px;
@@ -718,7 +711,7 @@ ul {
   height: 20px;
   border-radius: 50%;
   background: #fff;
-  color: var(--music-off);
+  color: var(--theme-dark);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.32);
   /* Transform only — animating `left` would lay out the nav on every frame.
      The squash below rides on the same property, so it has to be composed into
@@ -728,69 +721,30 @@ ul {
   transition: transform 0.34s var(--ease), color 0.32s var(--ease);
 }
 
-.music[data-playing='true'] .music__knob {
+.theme[data-light='true'] .theme__knob {
   transform: translateX(20px) scaleX(1);
   /* Anchored to the trailing edge in each direction, so the stretch always
      runs back along the travel instead of pushing past the track's inset. */
   transform-origin: right center;
-  color: var(--music-on);
+  color: var(--theme-light);
 }
 
-.music__knob svg {
+.theme__knob svg {
   width: 13px;
   height: 13px;
 }
 
-.music:hover .music__switch {
+.theme:hover .theme__switch {
   filter: brightness(1.08);
 }
 
 /* Stretches toward where it came from, like a physical switch under thumb. */
-.music:active .music__knob {
+.theme:active .theme__knob {
   transform: translateX(0) scaleX(1.16);
 }
 
-.music[data-playing='true']:active .music__knob {
+.theme[data-light='true']:active .theme__knob {
   transform: translateX(20px) scaleX(1.16);
-}
-
-/* On, but a video has the speakers. Stays unmistakably in the ON position —
-   that is still the visitor's choice — just drained of its glow. */
-.music[data-yielded='true'] .music__switch {
-  background: rgba(253, 110, 96, 0.42);
-  box-shadow: none;
-}
-
-.music[data-yielded='true'] .music__knob {
-  color: rgba(253, 110, 96, 0.75);
-}
-
-.music__label {
-  font-size: clamp(0.74rem, 1.15vw, 0.84rem);
-  font-weight: 400;
-  line-height: 1;
-  color: rgba(255, 255, 255, 0.62);
-  white-space: nowrap;
-  transition: color 0.24s var(--ease);
-}
-
-.music__artist {
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.92);
-}
-
-.music:hover .music__label {
-  color: rgba(255, 255, 255, 0.82);
-}
-
-/* Kept next to the component rather than in the breakpoint blocks at the
-   bottom: this one is about the track name's own width, not the page layout.
-   The nav runs out of room for brand + three links + a song title well before
-   the 460px phone breakpoint, so it gets its own threshold. */
-@media (max-width: 620px) {
-  .music__label {
-    display: none;
-  }
 }
 
 .nav__links {
@@ -804,7 +758,7 @@ ul {
   padding: 6px 2px;
   font-size: clamp(0.78rem, 1.35vw, 0.94rem);
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(var(--fg-rgb), 0.82);
   transition: color 0.2s var(--ease);
 }
 
@@ -832,7 +786,7 @@ ul {
 }
 
 .nav__link--active {
-  color: #fff;
+  color: var(--fg);
 }
 
 /* --- Footer bars --------------------------------------------------------- */
@@ -875,8 +829,8 @@ ul {
 }
 
 .footer-bar--dark {
-  background: var(--ink);
-  color: var(--cream);
+  background: var(--bg);
+  color: var(--footer-ink);
 }
 
 .footer-bar--light {
@@ -1057,8 +1011,8 @@ ul {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, var(--about-split)) minmax(0, 1fr);
-  background: var(--cream);
-  color: var(--ink);
+  background: var(--about-bg);
+  color: var(--about-ink);
 }
 
 .about__copy {
@@ -1075,7 +1029,7 @@ ul {
 .about__title {
   font-size: clamp(2.6rem, 6vw, 4.8rem);
   font-weight: 300;
-  color: var(--ink);
+  color: var(--about-ink);
   -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
 }
@@ -1085,7 +1039,7 @@ ul {
   margin-top: clamp(20px, 3vw, 34px);
   font-size: clamp(0.92rem, 1.35vw, 1.02rem);
   line-height: 1.62;
-  color: #2a2a2a;
+  color: var(--about-body);
   text-align: justify;
   text-wrap: pretty;
 }
@@ -1096,16 +1050,16 @@ ul {
 
 .about__body strong {
   font-weight: 600;
-  color: var(--ink);
+  color: var(--about-ink);
 }
 
 .about__body .hl-teal {
-  color: var(--teal-ink);
+  color: var(--about-teal);
   font-weight: 600;
 }
 
 .about__body .hl-coral {
-  color: var(--coral-deep);
+  color: var(--about-coral);
   font-weight: 600;
 }
 
@@ -1128,7 +1082,7 @@ ul {
   display: inline-block;
   padding: 10px 24px;
   border-radius: 0;
-  background: var(--ink-3);
+  background: var(--about-pill);
   color: #fff;
   font-size: clamp(0.76rem, 1.1vw, 0.84rem);
   font-weight: 500;
@@ -1353,7 +1307,7 @@ ul {
 }
 
 .work__tab:hover {
-  color: #fff;
+  color: var(--fg);
   transform: translateX(3px);
 }
 
@@ -1374,10 +1328,10 @@ ul {
 
 /* --- Tools used / categories (rail groups) ------------------------------- */
 
+/* Label and logos on one line. */
 .tools {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   animation: tab-wipe 0.58s cubic-bezier(0.66, 0, 0.28, 1);
 }
@@ -1401,15 +1355,15 @@ ul {
   width: clamp(32px, 3.4vw, 39px);
   aspect-ratio: 1;
   border-radius: 8px;
-  background: var(--ink-4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--surface-2);
+  border: 1px solid rgba(var(--fg-rgb), 0.1);
   transition: transform 0.22s var(--ease), border-color 0.22s var(--ease);
 }
 
 .tools__item:hover,
 .tools__item:focus-visible {
   transform: translateY(-3px);
-  border-color: rgba(255, 255, 255, 0.28);
+  border-color: rgba(var(--fg-rgb), 0.28);
 }
 
 .tools__item img {
@@ -1424,7 +1378,7 @@ ul {
 .tools__fallback {
   font-size: 1.05rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(var(--fg-rgb), 0.65);
 }
 
 /* Name tooltip, revealed above the logo on hover / keyboard focus. */
@@ -1435,9 +1389,9 @@ ul {
   transform: translateX(-50%) translateY(4px);
   padding: 4px 9px;
   border-radius: 6px;
-  background: rgba(13, 13, 13, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #fff;
+  background: rgba(var(--bg-rgb), 0.96);
+  border: 1px solid rgba(var(--fg-rgb), 0.14);
+  color: var(--fg);
   font-size: 0.72rem;
   font-weight: 400;
   letter-spacing: 0.02em;
@@ -1457,7 +1411,7 @@ ul {
   left: 50%;
   transform: translateX(-50%);
   border: 5px solid transparent;
-  border-top-color: rgba(13, 13, 13, 0.96);
+  border-top-color: rgba(var(--bg-rgb), 0.96);
 }
 
 .tools__item:hover .tools__name,
@@ -1500,7 +1454,7 @@ ul {
 }
 
 .cats__item:hover {
-  color: #fff;
+  color: var(--fg);
 }
 
 .cats__item--active {
@@ -1527,8 +1481,8 @@ ul {
   display: grid;
   place-items: center;
   min-height: clamp(160px, 22vh, 240px);
-  border: 1px dashed rgba(255, 255, 255, 0.16);
-  color: rgba(255, 255, 255, 0.5);
+  border: 1px dashed rgba(var(--fg-rgb), 0.16);
+  color: rgba(var(--fg-rgb), 0.5);
   font-size: 0.76rem;
   font-weight: 500;
   letter-spacing: 0.18em;
@@ -1566,10 +1520,10 @@ ul {
   position: absolute;
   inset: 0;
   border: 0;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(var(--fg-rgb), 0.6);
   background: repeating-linear-gradient(
     -45deg,
-    rgba(255, 255, 255, 0.08) 0 1px,
+    rgba(var(--fg-rgb), 0.08) 0 1px,
     transparent 1px 13px
   );
 }
@@ -1697,7 +1651,7 @@ ul {
   gap: 8px;
   padding: 20px;
   background: rgba(0, 0, 0, 0.82);
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(var(--fg-rgb), 0.75);
   font-size: 0.78rem;
   line-height: 1.5;
   text-align: center;
@@ -1706,7 +1660,7 @@ ul {
 .card__fallback code {
   padding: 2px 7px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--fg-rgb), 0.1);
   font-size: 0.74rem;
   color: var(--mint);
 }
@@ -1731,7 +1685,7 @@ ul {
   line-height: 1.35;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: #fff;
+  color: var(--fg);
   text-wrap: balance;
 }
 
@@ -1758,7 +1712,7 @@ ul {
 }
 
 .card:hover .card__action {
-  color: #fff;
+  color: var(--fg);
 }
 
 .card--program:hover .card__action svg {
@@ -1768,7 +1722,7 @@ ul {
 .card__award {
   font-size: 0.8rem;
   line-height: 1.45;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(var(--fg-rgb), 0.78);
 }
 
 .card__roles {
@@ -1849,7 +1803,7 @@ ul {
   margin-top: clamp(14px, 2.4vh, 24px);
   font-size: clamp(0.95rem, 1.3vw, 1.1rem);
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(var(--fg-rgb), 0.72);
 }
 
 .talk__groups {
@@ -1888,7 +1842,7 @@ ul {
   gap: 14px;
   padding: 11px 2px;
   font-size: clamp(0.9rem, 1.4vw, 1.02rem);
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(var(--fg-rgb), 0.92);
   transition: color 0.2s var(--ease);
 }
 
@@ -2235,12 +2189,8 @@ ul {
 
   /* The knob still has to land in the right place — the blanket rule only
      removes the travel between the two positions, which is the point. */
-  .music__knob {
+  .theme__knob {
     transition-duration: 0.01ms !important;
   }
 
-  /* An infinite loop squeezed to 0.01ms would strobe, not stop. */
-  .intro[data-ready='true'] .intro__enter {
-    animation: none;
-  }
 }

@@ -180,22 +180,6 @@ export function slideIn(run, el, position, distance = 12) {
   run.add(el, { x: [-distance, 0], opacity: [0, 1], duration: 600 }, position)
 }
 
-/* A readout that ticks over before landing. Kept for the one number that
-   earns it — the hero's year, echoing the intro's counter. */
-export function decode(run, el, position, params = {}) {
-  if (!el) return
-  run.add(
-    el,
-    {
-      innerHTML: text.scrambleText({ chars: 'uppercase', revealRate: 30, ...params }),
-      // Explicit end: a bare `from` would read the end off the element, which
-      // add() has just set to the starting 0.
-      opacity: { from: 0, to: 1, duration: 200 },
-    },
-    position
-  )
-}
-
 /* Registration marks turn a quarter into place — the same quarter-turn they
    make on hover — and grow out of their centre. */
 export function marksIn(run, marks, position, delay = stagger(60)) {

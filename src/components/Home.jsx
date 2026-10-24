@@ -5,7 +5,6 @@ import CornerMarks, { LineMarks } from './CornerMarks.jsx'
 import Crosshair from './Crosshair.jsx'
 import { HERO, PANELS } from '../data/content.js'
 import {
-  decode,
   entrance,
   marksIn,
   riseChars,
@@ -16,8 +15,7 @@ import {
 } from '../motion/motion.js'
 
 /* The hero opens like a title sequence: the plate settles, the greeting steps
-   in, PORTFOLIO rises letter by letter, and the year ticks over like the
-   intro's counter before landing on 2026. */
+   in, PORTFOLIO rises letter by letter, and the year fades in. */
 function heroEntrance(root) {
   const run = entrance(root, { delay: 380 })
   const q = (s) => root.querySelector(s)
@@ -31,7 +29,7 @@ function heroEntrance(root) {
     { y: ['0.7em', '0em'], opacity: [0, 1], duration: 800, delay: stagger(110) },
     700
   )
-  decode(run, q('.hero__year'), 450, { chars: 'numbers', from: 'right', revealRate: 10 })
+  run.add(q('.hero__year'), { opacity: [0, 1], duration: 900 }, 450)
   run.add(q('.hero__edition'), { opacity: [0, 1], duration: 900 }, 1050)
 
   return run

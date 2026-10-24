@@ -31,9 +31,8 @@ function audioContext() {
 const GRAPH = Symbol('audioBoost')
 
 /* Wires `el` through the limiter and gain (once) and returns { gain }, the
-   GainNode, or null where Web Audio isn't available. Exported for the music,
-   which drives its gain directly: it's the one volume control iOS honours. */
-export function audioGraph(el) {
+   GainNode, or null where Web Audio isn't available. */
+function audioGraph(el) {
   const ctx = audioContext()
   if (!ctx) return null
   if (el[GRAPH]) return el[GRAPH]

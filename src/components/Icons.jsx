@@ -61,18 +61,25 @@ export function GithubIcon(props) {
 
 /* Rides inside the toggle knob at ~13px, so it carries a heavier stroke than
    the contact icons — 1.7 disappears at that size. */
-export function HeadphonesIcon(props) {
+export function MoonIcon(props) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1Z" fill="currentColor" />
+    </svg>
+  )
+}
+
+export function SunIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <circle cx="12" cy="12" r="4.6" fill="currentColor" />
       <path
-        d="M4.4 15.2v-3a7.6 7.6 0 0 1 15.2 0v3"
+        d="M12 1.8v2.6M12 19.6v2.6M1.8 12h2.6M19.6 12h2.6M4.8 4.8l1.8 1.8M17.4 17.4l1.8 1.8M4.8 19.2l1.8-1.8M17.4 6.6l1.8-1.8"
         fill="none"
         stroke="currentColor"
         strokeWidth="2.2"
         strokeLinecap="round"
       />
-      <rect x="2" y="14" width="4.8" height="7.2" rx="2.4" fill="currentColor" />
-      <rect x="17.2" y="14" width="4.8" height="7.2" rx="2.4" fill="currentColor" />
     </svg>
   )
 }

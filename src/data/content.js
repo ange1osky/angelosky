@@ -13,21 +13,13 @@ export const SECTIONS = [
   { id: 'contacts', label: 'Contacts' },
 ]
 
-export const MUSIC = {
-  src: '/audio/music.mp3',
-  volume: 0.85,       // computer: base level, 0–1, before the boost below
-  boost: 1.5,         // computer: Web Audio gain (>1) so the bed can exceed the 100% cap
-  phoneVolume: 0.35,  // phones and tablets: the whole level, 0–1, no boost
-}
-
 /* Clips are authored at wildly different levels, and the browser caps a plain
    <video> at 100%. On a computer this Web Audio gain (>1) lifts the quiet ones
    toward the loudness they'd have in a desktop player; a limiter in
    useAudioBoost tames the peaks so it stays clean. */
 export const VIDEO_BOOST = 1.8
 
-/* Phones and tablets use this instead: the whole level, 0–1, no boost. Kept
-   above MUSIC.phoneVolume, since a clip is what you came to watch. */
+/* Phones and tablets use this instead: the whole level, 0–1, no boost. */
 export const VIDEO_PHONE_VOLUME = 0.6
 
 /* --- Home ---------------------------------------------------------------- */
@@ -120,11 +112,9 @@ export const PROJECTS_HEAD = {
   },
 }
 
-/* 19 video slots — one line each so they're quick to edit.
- * `src`    — the .mp4 in `public/videos/`.
- * `poster` — the thumbnail in `public/images/thumbs/`, shown before playback
- *            and again as the <video> poster while the first frame decodes. */
 export const VIDEOS = [
+  { id: 'v24', title: 'LANGGAM? English Midterms Film', award: '', roles: 'Director | Videographer | Editor | Actor | Voice Actor', src: '/videos/24.mp4', poster: '/images/thumbs/24.png' },
+  { id: 'v23', title: 'Scarlet\'s 18th Birthday', award: '', roles: 'Videographer | Editor', src: '/videos/23.mp4', poster: '/images/thumbs/23.png' },
   { id: 'v22', title: 'Bisaya Music Festival 2026', award: '', roles: 'Videographer | Editor', src: '/videos/22.mp4', poster: '/images/thumbs/22.png' },
   { id: 'v21', title: 'CIT-U: CCS Acquaintance Party 2026', award: '', roles: 'Videographer | Editor', src: '/videos/21.mp4', poster: '/images/thumbs/21.png' },
   { id: 'v20', title: 'Cebu Oceanpark', award: '', roles: 'Personal Project', src: '/videos/20.mp4', poster: '/images/thumbs/20.png' },
@@ -149,10 +139,7 @@ export const VIDEOS = [
   { id: 'v0', title: 'Graduation MV: Before We Go', award: '', roles: 'Director | Videographer | Editor', src: '/videos/0.mp4', poster: '/images/thumbs/0.png' },
 ]
 
-/* Each card is a link — swap `href` for the real destination.
- * `category` — what kind of project it is, listed in the row under the tabs.
- *              Reuse an existing string to file a project under that category;
- *              write a new one and the category appears on its own. */
+
 export const PROGRAMS = [
   {
     id: 'p1',

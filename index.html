@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0d0d0d" />
 
+    <!-- Applies a saved light/dark choice before first paint (ThemeToggle.jsx). -->
+    <script>
+      try {
+        if (localStorage.getItem('angelosky:theme') === 'light')
+          document.documentElement.dataset.theme = 'light'
+      } catch (e) {}
+    </script>
+
     <title>angelosky.portfolio</title>
     <meta name="author" content="Angelo Balane" />
 

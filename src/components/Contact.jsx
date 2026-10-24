@@ -139,7 +139,7 @@ export default function Contact() {
 
       </div>
 
-      <FooterBar tone="light" />
+      <FooterBar tone="dark" />
     </section>
   )
 }

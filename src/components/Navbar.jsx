@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BRAND, SECTIONS } from '../data/content.js'
-import MusicToggle from './MusicToggle.jsx'
+import ThemeToggle from './ThemeToggle.jsx'
 import { LineMarks } from './CornerMarks.jsx'
 
 /* Fixed across all three pages. Links change the hash route; the browser's
@@ -21,7 +21,7 @@ export default function Navbar({ route }) {
         {/* Grouped so the nav's space-between still pushes the links right,
             however many controls end up sitting on the left. */}
         <div className="nav__left">
-          <MusicToggle />
+          <ThemeToggle />
           <a className="nav__brand" href="#/home">
             {BRAND}
           </a>
